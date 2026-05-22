@@ -1,0 +1,97 @@
+# Lift — Weather Briefing App for Sailing Teams
+# .cursorrules — Cursor AI instructions for this project
+# Last updated: May 2026
+
+## PROJECT IDENTITY
+
+This is "Lift" — a self-hosted, single-file HTML weather briefing tool for Grand Prix yacht racing teams.
+Built by and for a professional navigator. Clinical, fast, information-dense.
+The primary user is a navigator or meteorologist producing daily briefings for crew and shore team.
+
+## ARCHITECTURE — NON-NEGOTIABLE
+
+- Single-file HTML/CSS/JS: index.html is the ENTIRE application. No separate .css or .js files unless explicitly requested.
+- No frameworks. No React, Vue, Svelte, Alpine, or similar. Vanilla HTML/CSS/JS only.
+- No npm, no package.json, no build step, no bundler.
+- CDN libraries only: Chart.js, Leaflet, Lucide icons are pre-approved. Ask before adding anything else.
+- Python server (weather_brief_server.py) runs at http://localhost:8765 — do not change the port.
+- The server exposes: GET /api/squid-grib?lat=X&lon=Y&file=NAME and GET /api/gribs and GET /api/health
+- extract_squid_grib.py handles all GRIB parsing. Do not duplicate its logic in JS.
+
+## DESIGN SYSTEM — USE EXISTING TOKENS ONLY
+
+COLOURS: --bg --surface --surface2 --offset --div --border --text --muted --faint --inv --primary --primary-h --primary-hl --err --gold --blue --green
+SPACING: --s1 --s2 --s3 --s4 --s5 --s6 --s8 --s10 --s12
+BORDER RADIUS: --r-sm --r-md --r-lg --r-xl --r-full
+TYPE SCALE: --xs --sm --base --lg --xl
+SHADOWS: --sha-sm --sha-md --sha-lg
+TRANSITIONS: --tr (180ms cubic-bezier(.16,1,.3,1))
+FONT: --font = Satoshi, Helvetica Neue, sans-serif
+
+NEVER hardcode hex values, px sizes, or font names. ALWAYS use the token.
+
+## COMPONENT PATTERNS
+
+BUTTONS: btn btn-primary / btn btn-ghost / btn btn-sm / icon-btn
+INPUTS: fc (input/select/textarea) — wrap in fg with label
+LAYOUT: fr (two-col grid) / fg (flex-col group) / sec-label / divider
+CARDS: pcard c0-c5 cx (forecast) / model-card (comparison)
+STATUS: status-row with dot green/yellow/red
+TABS: tab-btn active — panels shown/hidden via switchTab()
+TOAST: use existing showToast() only
+
+## DATA SOURCES
+
+1. Squid GRIB — http://localhost:8765/api/squid-grib?lat=X&lon=Y
+   Returns: { meta: {modelLabel, refDate, refTime}, hours[], tws[], twd[], gust[], temp[], wave[], wmo[] }
+2. Open-Meteo — https://api.open-meteo.com/v1/forecast
+3. Open-Meteo Marine — https://marine-api.open-meteo.com/v1/marine
+
+All wind data internally: { tws: kt, twd: degrees_true, gust: kt }
+Temperature: Celsius. Waves: metres. Time: local CEST (UTC+2).
+
+## TERMINOLOGY
+
+TWS not "wind speed" — TWD not "wind direction" — GWD not "gust direction"
+kt not "knots" — Hs not "wave height" — CAPE spelled out first use only
+No emojis. No exclamation marks. Clinical, data-dense, professional.
+
+## SAILING RULES
+
+- TWD = direction FROM WHICH wind blows (meteorological convention)
+- Wind arrows point IN THE DIRECTION WIND IS GOING (rotate 180° from TWD)
+- Beaufort: 0=<1kt 1=1-3kt 2=4-6kt 3=7-10kt 4=11-16kt 5=17-21kt 6=22-27kt 7=28-33kt 8=34-40kt
+- Model runs: "00z 18 May" not "midnight run"
+- GRIB age: green <6h / amber 6-12h / red >12h
+
+## PDF/PRINT
+
+- -webkit-print-color-adjust: exact on all coloured elements
+- A4 portrait for quick brief / A4 landscape for detailed
+- page-break-inside: avoid on forecast cards
+- Canvas charts → canvas.toDataURL() before print
+
+## FORECAST CARD ORDER
+
+1. Period + time range
+2. TWD + TWS + Gust
+3. Temperature
+4. Weather (WMO code)
+5. UV Index
+6. CAPE (with J/kg, colour-coded: <200 normal / 200-500 gold / 500-1000 err / >1000 err bold)
+7. Wave height + direction + period
+
+## MODEL COLOURS (consistent throughout)
+
+GFS=#3b82f6 ECMWF=#10b981 AROME=#f97316 ICON=#a855f7 Squid=#e11d48
+
+Agreement: TWS std dev <2kt=HIGH(green) 2-4kt=MEDIUM(amber) >4kt=LOW(red)
+Direction: circular std dev <20°=HIGH 20-40°=MEDIUM >40°=LOW
+
+## NEVER DO
+
+No TypeScript / No Tailwind / No jQuery / No CSS reset overrides
+No document.write() / No refactoring without being asked
+No changing CSS variable names / No changing function signatures
+No service worker / No authentication / No database
+No splitting index.html unless explicitly asked

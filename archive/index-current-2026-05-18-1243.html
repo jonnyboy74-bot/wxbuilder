@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Layla — Navigation Brief | 2026 IMA Maxi Europeans</title>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<style>
+:root{
+  --bg:#efede8;--surface:#e8e5e0;--border:#b8b4ac;--motion:#c8c4bc;
+  --text:#28251d;--muted:#7a7974;--inv:#fff;--err:#b64a4a;--gold:#d79a2b;--blue:#4f7fb2;--green:#10b981;
+  --primary:#2f5f8f;--primary-h:#243f63;
+  --r-md:.5rem;--r-lg:.75rem;--r-xl:1rem;
+  --s1:.25rem;--s2:.5rem;--s3:.75rem;--s4:1rem;--s5:1.25rem;--s6:1.5rem;--s8:2rem;
+  --xs:.8125rem;--sm:.9375rem;--base:1rem;--lg:1.35rem;
+  --font:'Satoshi','Helvetica Neue',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased}
+body{
+  min-height:100dvh;font-family:var(--font);font-size:var(--sm);color:var(--text);background:var(--bg);
+  display:grid;grid-template-columns:380px 1fr;grid-template-rows:auto 1fr;height:100dvh;overflow:hidden;
+}
+input,select,textarea,button{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:none}
+
+header{
+  grid-column:1/-1;background:var(--surface);border-bottom:1px solid var(--motion);
+  padding:var(--s3) var(--s6);display:flex;align-items:center;justify-content:space-between;gap:var(--s4);
+}
+.logo-name{font-size:var(--base);font-weight:700;letter-spacing:-.01em}
+.logo-sub{font-size:var(--xs);color:var(--muted)}
+.hdr-actions{display:flex;align-items:center;gap:var(--s2)}
+.btn{
+  display:inline-flex;align-items:center;gap:var(--s2);padding:var(--s2) var(--s4);
+  border-radius:var(--r-md);font-size:var(--sm);font-weight:500;
+}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-h)}
+.btn-primary:disabled{opacity:.45;cursor:not-allowed}
+.btn-squid{background:#2f5f8f;color:#fff;width:100%}
+.btn-squid:hover{background:var(--primary-h)}
+.btn-squid:disabled{opacity:.45;cursor:not-allowed}
+.btn-ghost{color:var(--muted);border:1px solid var(--border)}
+.btn-ghost:hover{background:#dedad4;color:var(--text)}
+
+aside{
+  background:var(--surface);border-right:1px solid var(--motion);
+  overflow-y:auto;padding:var(--s5);display:flex;flex-direction:column;gap:var(--s5);
+}
+.sec-label{
+  font-size:var(--xs);font-weight:600;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.07em;margin-bottom:var(--s2);
+}
+.fg{display:flex;flex-direction:column;gap:var(--s1);margin-bottom:var(--s3)}
+.fg label{font-size:var(--xs);font-weight:500;color:var(--muted)}
+.fc{
+  padding:var(--s2) var(--s3);border:1px solid var(--border);border-radius:var(--r-md);
+  background:var(--bg);width:100%;
+}
+.fc:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(47,95,143,.16)}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2)}
+.status-row{display:flex;align-items:center;gap:var(--s2);font-size:var(--xs);color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border)}
+.dot.green{background:#4f7fb2}.dot.yellow{background:#d79a2b}.dot.red{background:#b64a4a}
+
+.period-list{display:flex;flex-direction:column;gap:var(--s2)}
+.period-row{
+  display:flex;align-items:center;gap:var(--s3);padding:var(--s3);
+  border:1px solid var(--border);border-radius:var(--r-md);background:var(--bg);cursor:pointer;
+}
+.period-row.active{border-color:var(--primary);background:rgba(47,95,143,.08)}
+.period-check{
+  width:18px;height:18px;border-radius:4px;border:1.5px solid var(--border);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.period-row.active .period-check{background:var(--primary);border-color:var(--primary)}
+.pr-name{font-weight:600;font-size:var(--sm);flex:1}
+.pr-time{font-size:var(--xs);color:var(--muted)}
+
+.map-wrap{position:relative;margin-bottom:var(--s3)}
+#venueMap{height:220px;border-radius:var(--r-lg);border:1px solid var(--border);background:var(--bg);z-index:0}
+#venueMap .leaflet-container{border-radius:var(--r-lg);font-family:var(--font)}
+.map-hint{font-size:10px;color:var(--muted);line-height:1.4;margin-top:var(--s2)}
+.search-results{
+  position:absolute;left:0;right:0;top:100%;z-index:1000;margin-top:2px;
+  background:var(--bg);border:1px solid var(--border);border-radius:var(--r-md);
+  box-shadow:0 8px 24px rgba(40,37,29,.12);max-height:160px;overflow-y:auto;display:none;
+}
+.search-result{
+  display:block;width:100%;text-align:left;padding:var(--s2) var(--s3);
+  border-bottom:1px solid var(--motion);font-size:var(--xs);
+}
+.search-result:hover{background:var(--surface)}
+.search-result:last-child{border-bottom:none}
+.sr-name{font-weight:600;color:var(--text)}
+.sr-sub{color:var(--muted);font-size:10px;margin-top:1px}
+.nudge-row{display:flex;flex-wrap:wrap;gap:var(--s1);margin-top:var(--s2)}
+.nudge-btn{
+  padding:3px 8px;font-size:10px;font-weight:600;border:1px solid var(--border);
+  border-radius:var(--r-md);background:var(--bg);color:var(--muted);
+}
+.nudge-btn:hover{border-color:var(--primary);color:var(--primary)}
+.coord-readout{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:var(--s1)}
+
+main{overflow-y:auto;display:flex;flex-direction:column}
+.toolbar{
+  padding:var(--s4) var(--s6);border-bottom:1px solid var(--motion);background:var(--surface);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.toolbar h2{font-size:var(--base);font-weight:600}
+.preview-area{flex:1;padding:var(--s8) var(--s6);display:flex;justify-content:center}
+.forecast-doc{width:100%;max-width:760px;display:flex;flex-direction:column;gap:var(--s4)}
+.f-header{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);
+  padding:var(--s4) var(--s5);box-shadow:0 1px 2px rgba(40,37,29,.06);
+}
+.f-venue{font-size:var(--lg);font-weight:700;letter-spacing:-.02em}
+.f-date{font-size:var(--sm);color:var(--muted);margin-top:var(--s1)}
+.f-meta{font-size:var(--xs);color:var(--muted);margin-top:var(--s2)}
+.f-note{font-size:var(--sm);color:var(--muted);margin-top:var(--s2)}
+
+.daily-card{
+  grid-column:1/-1;
+  background:linear-gradient(150deg,#f7f4ee,#e5e0d8);
+  border:1px solid var(--border);border-radius:var(--r-xl);
+  box-shadow:0 8px 24px rgba(40,37,29,.10);overflow:hidden;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
+}
+.daily-top{
+  background:linear-gradient(135deg,#2b5f91,#26384f);
+  color:#fff;padding:var(--s5);display:grid;grid-template-columns:1.25fr .75fr;gap:var(--s5);
+}
+.daily-kicker{font-size:10px;text-transform:uppercase;letter-spacing:.08em;opacity:.78;font-weight:700}
+.daily-title{font-size:2.15rem;font-weight:750;letter-spacing:-.045em;margin-top:var(--s1)}
+.daily-sub{font-size:var(--sm);line-height:1.45;opacity:.86;margin-top:var(--s2)}
+.boat-name{color:var(--inv)}
+.daily-badge{
+  justify-self:end;align-self:start;border:1px solid rgba(255,255,255,.28);
+  border-radius:999px;padding:8px 14px;background:rgba(255,255,255,.10);
+  text-align:center;min-width:180px;
+}
+.run-main{font-size:var(--sm);font-weight:800;letter-spacing:.01em}
+.run-sub{font-size:var(--xs);opacity:.78;margin-top:2px}
+.run-sub strong{font-weight:800;opacity:1}
+.daily-note{font-size:var(--sm);line-height:1.45;opacity:.86;margin-top:var(--s2)}
+.daily-trend{font-size:var(--base);line-height:1.45;opacity:.90;margin-top:var(--s4)}
+.daily-trend strong{font-weight:800}
+.daily-subtle{opacity:.70}
+.daily-context{
+  display:flex;align-items:center;gap:var(--s3);flex-wrap:wrap;
+  font-size:var(--sm);opacity:.72;margin-top:var(--s1);
+}
+.daily-context span{white-space:nowrap}
+.daily-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border)}
+.metric{background:rgba(255,255,255,.42);padding:var(--s4);min-height:82px}
+.metric-label{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700}
+.metric-value{font-size:1.45rem;font-weight:700;letter-spacing:-.03em;margin-top:var(--s2)}
+.metric-value.long{font-size:1.05rem;line-height:1.25;letter-spacing:-.01em}
+.metric-value.single{font-size:1.25rem;line-height:1.2;white-space:nowrap}
+.metric-detail{font-size:var(--xs);color:var(--muted);line-height:1.35;margin-top:var(--s1)}
+.brief-strip{
+  display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);
+  border-top:1px solid var(--border);
+}
+.brief-item{background:rgba(255,255,255,.34);padding:var(--s3) var(--s4)}
+.brief-label{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700}
+.brief-value{font-size:var(--sm);font-weight:600;margin-top:2px}
+.day-row-title{
+  display:flex;align-items:baseline;gap:var(--s2);
+  margin-top:var(--s2);font-size:1.15rem;font-weight:800;color:#102f38;letter-spacing:-.02em;
+}
+.day-row-title span{font-size:var(--xs);font-weight:600;color:var(--muted);letter-spacing:0}
+
+.pcard{
+  border-radius:var(--r-xl);padding:var(--s4) var(--s5);color:#fff;
+  box-shadow:0 4px 12px rgba(40,37,29,.12);
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
+}
+.pcard.c0{background:linear-gradient(160deg,#4a78be,#5b90d8)}
+.pcard.c1{background:linear-gradient(160deg,#3f7db2,#5794c8)}
+.pcard.c2{background:linear-gradient(160deg,#5579b8,#6e93cc)}
+.pcard.c3{background:linear-gradient(160deg,#4e6ea8,#6584be)}
+.pcard.c4{background:linear-gradient(160deg,#3a5898,#4f74b8)}
+.pcard.c5{background:linear-gradient(160deg,#102d57,#203f73)}
+.pt-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:var(--s3)}
+.pt-name{font-size:var(--base);font-weight:700}
+.pt-time{font-size:var(--xs);opacity:.85}
+.frow{
+  font-size:var(--sm);line-height:1.5;padding:var(--s1) 0;border-top:1px solid rgba(255,255,255,.15);
+  display:flex;align-items:flex-start;gap:var(--s2);
+}
+.frow:first-of-type{border-top:none;padding-top:0}
+.row-icon{
+  width:17px;height:17px;flex:0 0 17px;opacity:.72;margin-top:2px;
+}
+.row-icon svg{display:block;width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.frow strong{font-weight:600}
+.cape-pill{
+  display:inline-flex;align-items:center;border-radius:999px;padding:1px 7px;margin-left:2px;
+  background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.24);font-weight:700;
+}
+.cape-low{color:#d9e2ea}.cape-watch{color:#f6d98b}.cape-active{color:#f2a36e}.cape-high{color:#ff8f8f}
+.f-footer{font-size:var(--xs);color:var(--muted);text-align:center;padding-top:var(--s2)}
+
+.empty{padding:var(--s8);text-align:center;color:var(--muted);font-size:var(--sm)}
+.err{
+  padding:var(--s4);border:1px solid #ef4444;border-radius:var(--r-lg);
+  background:rgba(239,68,68,.08);color:#991b1b;font-size:var(--sm);
+}
+
+@page{size:A4 landscape;margin:8mm}
+@media print{
+  aside,header,.toolbar,.no-print{display:none!important}
+  body{display:block;height:auto;overflow:visible}
+  main{overflow:visible}
+  .preview-area{padding:0}
+  .forecast-doc{max-width:none;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .f-header{grid-column:1/-1}
+  .daily-card{grid-column:1/-1}
+  .pcard{break-inside:avoid;page-break-inside:avoid}
+  html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+@media(max-width:900px){
+  body{grid-template-columns:1fr;grid-template-rows:auto auto 1fr;height:auto;overflow:auto}
+  aside{max-height:none;border-right:none;border-bottom:1px solid var(--motion)}
+  .daily-top,.daily-grid,.brief-strip{grid-template-columns:1fr}
+  .daily-badge{justify-self:start}
+}
+</style>
+</head>
+<body>
+
+<header class="no-print">
+  <div>
+    <div class="logo-name">Layla</div>
+    <div class="logo-sub">Navigation Brief · 2026 IMA Maxi Europeans</div>
+  </div>
+  <div class="hdr-actions">
+    <button type="button" class="btn btn-ghost" onclick="window.print()">Print A4</button>
+  </div>
+</header>
+
+<aside class="no-print">
+  <section>
+    <div class="sec-label">Location</div>
+    <div class="fg map-wrap">
+      <label for="placeSearch">Search · click map to place pin</label>
+      <input id="placeSearch" class="fc" type="search" placeholder="e.g. Sorrento, Gulf of Naples"
+        autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();searchPlace();}">
+      <div id="searchResults" class="search-results"></div>
+    </div>
+    <div id="venueMap"></div>
+    <p class="map-hint">Click open water or drag the pin for an offshore forecast point. Name it in the label field (e.g. Sorrento Offshore).</p>
+    <div class="coord-readout" id="coordReadout">40.626°N · 14.376°E</div>
+    <div class="nudge-row">
+      <span style="font-size:10px;color:var(--muted);align-self:center;margin-right:var(--s1)">Nudge</span>
+      <button type="button" class="nudge-btn" onclick="nudgePosition(0,1)">1 nm N</button>
+      <button type="button" class="nudge-btn" onclick="nudgePosition(90,1)">1 nm E</button>
+      <button type="button" class="nudge-btn" onclick="nudgePosition(180,1)">1 nm S</button>
+      <button type="button" class="nudge-btn" onclick="nudgePosition(270,1)">1 nm W</button>
+      <button type="button" class="nudge-btn" onclick="nudgePosition(180,3)">3 nm S</button>
+      <button type="button" class="nudge-btn" onclick="nudgePosition(180,5)">5 nm S</button>
+    </div>
+    <div class="fg" style="margin-top:var(--s3)">
+      <label for="venuePreset">Venue preset</label>
+      <select id="venuePreset" class="fc" onchange="loadPreset(this.value)">
+        <option value="">— Custom pin —</option>
+        <option value="42.135,3.118,Empuries">Empuries</option>
+        <option value="43.296,5.381,Marseille">Marseille</option>
+        <option value="43.117,5.928,Toulon">Toulon</option>
+        <option value="43.269,6.640,Saint-Tropez">Saint-Tropez</option>
+        <option value="43.698,7.265,Nice">Nice</option>
+        <option value="41.383,2.183,Barcelona">Barcelona</option>
+        <option value="39.571,2.646,Palma de Mallorca">Palma de Mallorca</option>
+        <option value="41.135,9.538,Porto Cervo">Porto Cervo</option>
+        <option value="40.626,14.376,Sorrento Race Area" selected>Sorrento Race Area</option>
+      </select>
+    </div>
+    <div class="fr">
+      <div class="fg">
+        <label for="latInput">Lat</label>
+        <input id="latInput" class="fc" type="number" step="0.001" value="40.626">
+      </div>
+      <div class="fg">
+        <label for="lonInput">Lon</label>
+        <input id="lonInput" class="fc" type="number" step="0.001" value="14.376">
+      </div>
+    </div>
+    <div class="fg">
+      <label for="venueInput">Venue label</label>
+      <input id="venueInput" class="fc" type="text" value="Sorrento Race Area">
+    </div>
+    <div class="fr" style="margin-top:var(--s1)">
+      <button type="button" class="btn btn-ghost" style="flex:1;font-size:var(--xs)" onclick="saveCustomSpot()">Save pin</button>
+      <select id="savedSpots" class="fc" style="flex:1.2" onchange="loadSavedSpot(this.value)">
+        <option value="">Saved pins…</option>
+      </select>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-label">Vessel & Event</div>
+    <div class="fg">
+      <label for="vesselPreset">Vessel preset</label>
+      <select id="vesselPreset" class="fc" onchange="applyVesselPreset(this.value)">
+        <option value="layla" selected>Gunboat 72 Layla</option>
+        <option value="custom">Custom vessel</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label for="vesselName">Boat name</label>
+      <input id="vesselName" class="fc" type="text" value="Layla">
+    </div>
+    <div class="fg">
+      <label for="eventPreset">Event preset</label>
+      <select id="eventPreset" class="fc" onchange="applyEventPreset(this.value)">
+        <option value="ima-sorrento" selected>IMA Maxi Europeans — Sorrento 2026</option>
+        <option value="custom">Custom event</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label for="eventName">Event</label>
+      <input id="eventName" class="fc" type="text" value="IMA Maxi Europeans — Sorrento 2026">
+    </div>
+    <div class="fg">
+      <label for="raceDay">Race day</label>
+      <input id="raceDay" class="fc" type="text" value="Day 1">
+    </div>
+    <button type="button" class="btn btn-ghost" style="width:100%;font-size:var(--xs)" onclick="loadImaSorrentoPreset()">Load IMA Maxi Europeans — Sorrento 2026</button>
+  </section>
+
+  <section>
+    <div class="sec-label">Forecast</div>
+    <div class="fg">
+      <label for="forecastSource">Source</label>
+      <select id="forecastSource" class="fc" onchange="handleSourceChange()">
+        <option value="grib" selected>Squid GRIB folder (race source)</option>
+        <option value="openmeteo">Open-Meteo quick forecast</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label for="fDate">Race date</label>
+      <input id="fDate" class="fc" type="date">
+    </div>
+    <div class="fg">
+      <label for="briefingModel">Open-Meteo model</label>
+      <select id="briefingModel" class="fc">
+        <option value="best">Best match (auto)</option>
+        <option value="ecmwf" selected>ECMWF IFS 9 km</option>
+        <option value="arome_hd">AROME HD 1.5 km (Météo-France)</option>
+        <option value="arpege">ARPEGE Europe 11 km (Météo-France)</option>
+        <option value="icon_2i">ICON-2i 2 km (ItaliaMeteo · IT hi-res)</option>
+        <option value="icon">ICON 7 km (DWD)</option>
+        <option value="gfs">GFS 25 km</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label for="fNote">Header note (optional)</label>
+      <input id="fNote" class="fc" type="text" placeholder="e.g. Practice race · Course area W">
+    </div>
+    <div class="fg">
+      <label for="fFooter">Footer (optional)</label>
+      <input id="fFooter" class="fc" type="text" placeholder="Issued by navigation">
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-label">Periods</div>
+    <div id="periodList" class="period-list"></div>
+  </section>
+
+  <section>
+    <div class="sec-label">Squid GRIB</div>
+    <p class="map-hint" style="margin-bottom:var(--s2)">Drop Squid X downloads into <strong>Squid Gribs/</strong>, then select a file or leave auto.</p>
+    <div class="fg">
+      <label for="squidGribSelect">GRIB file</label>
+      <select id="squidGribSelect" class="fc" onchange="handleSquidSelectionChange()">
+        <option value="">Best usable for pin (auto)</option>
+      </select>
+    </div>
+    <p class="map-hint" id="squidGribHint" style="margin-bottom:var(--s3)">Start via <strong>Start Layla.command</strong> on your Mac.</p>
+    <button type="button" id="squidGribBtn" class="btn btn-squid" onclick="loadSquidGrib()">Load Squid GRIB</button>
+  </section>
+
+  <section>
+    <button id="fetchBtn" type="button" class="btn btn-primary" style="width:100%" onclick="fetchForecast()">Fetch forecast (Open-Meteo)</button>
+    <div class="status-row" style="margin-top:var(--s3)">
+      <span id="statusDot" class="dot"></span>
+      <span id="statusMsg">Ready</span>
+    </div>
+  </section>
+</aside>
+
+<main>
+  <div class="toolbar no-print">
+    <h2>Period brief</h2>
+    <span id="lastUpdated" style="font-size:var(--xs);color:var(--muted)"></span>
+  </div>
+  <div class="preview-area">
+    <div id="forecastDoc" class="forecast-doc">
+      <div class="empty">Set venue and date, select periods, then fetch.</div>
+    </div>
+  </div>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+const PERIODS = [
+  { id:'dawn',    name:'Dawn',      from:'04:00', to:'07:00' },
+  { id:'early',   name:'Early',     from:'07:00', to:'09:00' },
+  { id:'morning', name:'Morning',   from:'09:00', to:'12:00' },
+  { id:'midday',  name:'Midday',    from:'12:00', to:'15:00' },
+  { id:'aftn',    name:'Afternoon', from:'15:00', to:'18:00' },
+  { id:'evening', name:'Evening',   from:'18:00', to:'21:00' },
+];
+const ACTIVE_DEFAULT = ['early','morning','midday','aftn'];
+const DIR16 = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+const WMO_SKY = {
+  0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',
+  45:'Foggy',48:'Rime fog',
+  51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',
+  61:'Light rain',63:'Rain',65:'Heavy rain',
+  80:'Showers',81:'Showers',82:'Heavy showers',
+  95:'Thunderstorm',96:'Thunderstorm + hail',99:'Thunderstorm + hail'
+};
+const MODEL_LABELS = {
+  best:'Auto', icon:'ICON 7 km', ecmwf:'ECMWF 9 km', gfs:'GFS 25 km',
+  arome_hd:'AROME HD 1.5 km', arpege:'ARPEGE Europe 11 km',
+  icon_2i:'ICON-2i 2 km'
+};
+const MODEL_DOMAIN_MSG = {
+  arome_hd: 'AROME HD 1.5 km covers France only. This position is outside the model domain.',
+  arpege: 'ARPEGE Europe: no data at this position.',
+  icon_2i: 'ICON-2i (ItaliaMeteo): no data at this position — Italy / southern Europe domain only.',
+};
+const METEOFRANCE_MODELS = new Set(['arome_hd', 'arpege']);
+
+let activePeriods = new Set(ACTIVE_DEFAULT);
+let forecastData = null;
+let gribSourceLabel = null;
+let forecastMeta = null;
+const SAVED_PINS_KEY = 'layla-saved-pins';
+let venueMap = null;
+let venueMarker = null;
+
+function initVenueMap(){
+  const lat = parseFloat(document.getElementById('latInput').value) || 40.626;
+  const lon = parseFloat(document.getElementById('lonInput').value) || 14.376;
+  venueMap = L.map('venueMap', { zoomControl: true }).setView([lat, lon], 11);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+    attribution: '&copy; OpenStreetMap'
+  }).addTo(venueMap);
+  L.tileLayer('https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png', {
+    attribution: 'OpenSeaMap'
+  }).addTo(venueMap);
+  venueMarker = L.marker([lat, lon], { draggable: true }).addTo(venueMap);
+  venueMarker.on('dragend', () => {
+    const p = venueMarker.getLatLng();
+    setPosition(p.lat, p.lng, { fromMap: true });
+  });
+  venueMap.on('click', e => setPosition(e.latlng.lat, e.latlng.lng, { fromMap: true }));
+  setTimeout(() => venueMap.invalidateSize(), 150);
+  updateCoordReadout(lat, lon);
+}
+
+function setPosition(lat, lon, opts = {}){
+  lat = Math.round(lat * 1000) / 1000;
+  lon = Math.round(lon * 1000) / 1000;
+  document.getElementById('latInput').value = lat;
+  document.getElementById('lonInput').value = lon;
+  updateCoordReadout(lat, lon);
+  if(venueMarker) venueMarker.setLatLng([lat, lon]);
+  if(venueMap && opts.pan !== false) venueMap.panTo([lat, lon]);
+  if(!opts.skipPresetClear) document.getElementById('venuePreset').value = '';
+  if(!opts.skipRender) renderBrief();
+}
+
+function updateCoordReadout(lat, lon){
+  const ns = lat >= 0 ? 'N' : 'S';
+  const ew = lon >= 0 ? 'E' : 'W';
+  document.getElementById('coordReadout').textContent =
+    `${Math.abs(lat).toFixed(3)}°${ns} · ${Math.abs(lon).toFixed(3)}°${ew}`;
+}
+
+function nudgePosition(bearingDeg, nm){
+  const lat = parseFloat(document.getElementById('latInput').value);
+  const lon = parseFloat(document.getElementById('lonInput').value);
+  if(isNaN(lat) || isNaN(lon)) return;
+  const br = bearingDeg * Math.PI / 180;
+  const dLat = (nm / 60) * Math.cos(br);
+  const dLon = (nm / 60) * Math.sin(br) / Math.cos(lat * Math.PI / 180);
+  setPosition(lat + dLat, lon + dLon, { fromMap: true });
+}
+
+async function searchPlace(){
+  const q = document.getElementById('placeSearch').value.trim();
+  const resultsEl = document.getElementById('searchResults');
+  if(!q){ resultsEl.style.display = 'none'; return; }
+  resultsEl.style.display = 'block';
+  resultsEl.innerHTML = '<div class="search-result"><span class="sr-sub">Searching…</span></div>';
+  const urls = [
+    `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=6&lang=en`,
+    `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=6`
+  ];
+  for(const url of urls){
+    try {
+      const res = await fetch(url, { headers: { Accept: 'application/json' } });
+      if(!res.ok) continue;
+      const raw = await res.json();
+      let items = [];
+      if(raw.features){
+        items = raw.features.map(f => ({
+          lat: f.geometry.coordinates[1],
+          lon: f.geometry.coordinates[0],
+          name: [f.properties.name, f.properties.city || f.properties.state, f.properties.country].filter(Boolean).join(', '),
+          sub: [f.properties.type, f.properties.country].filter(Boolean).join(' · ')
+        }));
+      } else if(Array.isArray(raw)){
+        items = raw.map(r => ({
+          lat: parseFloat(r.lat),
+          lon: parseFloat(r.lon),
+          name: r.display_name.split(',').slice(0, 2).join(', '),
+          sub: r.display_name.split(',').slice(2, 4).join(', ')
+        }));
+      }
+      if(!items.length){
+        resultsEl.innerHTML = '<div class="search-result"><span class="sr-sub">No results</span></div>';
+        return;
+      }
+      resultsEl.innerHTML = items.map((r, i) =>
+        `<button type="button" class="search-result" data-i="${i}">
+          <div class="sr-name">${escapeHtml(r.name)}</div>
+          <div class="sr-sub">${escapeHtml(r.sub || '')}</div>
+        </button>`
+      ).join('');
+      resultsEl.querySelectorAll('.search-result').forEach((btn, i) => {
+        btn.onclick = () => selectSearchResult(items[i].lat, items[i].lon, items[i].name);
+      });
+      return;
+    } catch(e) { continue; }
+  }
+  resultsEl.innerHTML = '<div class="search-result"><span class="sr-sub">Search failed</span></div>';
+}
+
+function selectSearchResult(lat, lon, name){
+  setPosition(lat, lon, { pan: true });
+  document.getElementById('venueInput').value = name;
+  document.getElementById('placeSearch').value = '';
+  document.getElementById('searchResults').style.display = 'none';
+  if(venueMap) venueMap.setZoom(12);
+  renderBrief();
+}
+
+function getSavedSpots(){
+  try { return JSON.parse(localStorage.getItem(SAVED_PINS_KEY) || '[]'); }
+  catch { return []; }
+}
+
+function refreshSavedSpotsSelect(){
+  const sel = document.getElementById('savedSpots');
+  const spots = getSavedSpots();
+  sel.innerHTML = '<option value="">Saved pins…</option>' +
+    spots.map(s => `<option value="${escapeHtml(s.key)}">${escapeHtml(s.label)}</option>`).join('');
+}
+
+function saveCustomSpot(){
+  const label = document.getElementById('venueInput').value.trim();
+  if(!label){ alert('Enter a venue label first (e.g. Sorrento Offshore).'); return; }
+  const lat = document.getElementById('latInput').value;
+  const lon = document.getElementById('lonInput').value;
+  const key = `${lat},${lon},${label}`;
+  const spots = getSavedSpots().filter(s => s.key !== key);
+  spots.push({ key, lat, lon, label });
+  localStorage.setItem(SAVED_PINS_KEY, JSON.stringify(spots));
+  refreshSavedSpotsSelect();
+  document.getElementById('savedSpots').value = key;
+  setStatus('green', `Saved pin: ${label}`);
+}
+
+function loadSavedSpot(val){
+  if(!val) return;
+  const spots = getSavedSpots();
+  const spot = spots.find(s => s.key === val);
+  if(!spot) return;
+  document.getElementById('venueInput').value = spot.label;
+  setPosition(parseFloat(spot.lat), parseFloat(spot.lon), { skipPresetClear: true });
+  document.getElementById('venuePreset').value = '';
+}
+
+function degToDir(deg){
+  if(deg == null || isNaN(deg)) return '—';
+  return DIR16[Math.round(deg / 22.5) % 16];
+}
+function wmoSky(c){ return WMO_SKY[c] || 'Variable'; }
+function waveDesc(h){
+  if(h == null || isNaN(h)) return 'Calm';
+  if(h < 0.5) return 'Slight';
+  if(h < 1.25) return 'Moderate';
+  if(h < 2.5) return 'Rough';
+  return 'Very rough';
+}
+function validVals(arr, idxs = null){
+  const source = idxs ? idxs.map(i => arr?.[i]) : (arr || []);
+  return source.filter(x => x != null && !isNaN(x));
+}
+function avgValue(arr, idxs = null){
+  const v = validVals(arr, idxs);
+  return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
+}
+function minValue(arr, idxs = null){
+  const v = validVals(arr, idxs);
+  return v.length ? Math.min(...v) : null;
+}
+function maxValue(arr, idxs = null){
+  const v = validVals(arr, idxs);
+  return v.length ? Math.max(...v) : null;
+}
+function windDirMean(arr, idxs = null){
+  const v = validVals(arr, idxs);
+  if(!v.length) return null;
+  const sx = v.reduce((a, d) => a + Math.sin(d * Math.PI / 180), 0) / v.length;
+  const cx = v.reduce((a, d) => a + Math.cos(d * Math.PI / 180), 0) / v.length;
+  return ((Math.atan2(sx, cx) * 180 / Math.PI) + 360) % 360;
+}
+function modeValue(arr, idxs = null){
+  const v = validVals(arr, idxs);
+  if(!v.length) return null;
+  const freq = {};
+  v.forEach(x => { freq[x] = (freq[x] || 0) + 1; });
+  return Object.keys(freq).reduce((a, b) => freq[b] > freq[a] ? b : a);
+}
+function fmtRange(min, max, unit = ''){
+  if(min == null || max == null) return '—';
+  const a = Math.round(min);
+  const b = Math.round(max);
+  return a === b ? `${a}${unit}` : `${a}–${b}${unit}`;
+}
+function capeClass(cape){
+  if(cape == null || isNaN(cape)) return 'cape-low';
+  if(cape >= 1000) return 'cape-high';
+  if(cape >= 500) return 'cape-active';
+  if(cape >= 200) return 'cape-watch';
+  return 'cape-low';
+}
+function capeLabel(cape){
+  if(cape == null || isNaN(cape)) return 'Unavailable';
+  if(cape >= 1000) return 'High instability';
+  if(cape >= 500) return 'Active instability';
+  if(cape >= 200) return 'Watch';
+  return 'Low';
+}
+function fmt12(t){
+  const [h, m] = t.split(':');
+  const hr = parseInt(h, 10);
+  const ap = hr >= 12 ? 'pm' : 'am';
+  const h12 = hr % 12 || 12;
+  return m === '00' ? `${h12}${ap}` : `${h12}:${m}${ap}`;
+}
+function fmtDate(iso){
+  const d = new Date(iso + 'T00:00:00');
+  const days = ['Sun','Mon','Tues','Wed','Thurs','Fri','Sat'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+function setStatus(color, msg){
+  document.getElementById('statusDot').className = 'dot ' + color;
+  document.getElementById('statusMsg').textContent = msg;
+}
+
+function formatCoord(lat, lon){
+  if(lat == null || lon == null || isNaN(lat) || isNaN(lon)) return '';
+  const la = Number(lat);
+  const lo = Number(lon);
+  return `${Math.abs(la).toFixed(3)}°${la >= 0 ? 'N' : 'S'} ${Math.abs(lo).toFixed(3)}°${lo >= 0 ? 'E' : 'W'}`;
+}
+
+function formatRunTime(meta){
+  if(!meta?.refDate || !meta?.refTime) return '';
+  const d = String(meta.refDate);
+  const t = String(meta.refTime).padStart(4, '0');
+  if(d.length !== 8) return '';
+  return `${d.slice(0,4)}-${d.slice(4,6)}-${d.slice(6,8)} ${t.slice(0,2)}${t.slice(2)}Z`;
+}
+
+function runScheduleForModel(model){
+  if(model === 'ecmwf') return [0, 12];
+  return [0, 6, 12, 18];
+}
+
+function formatDuration(ms){
+  const totalMin = Math.max(0, Math.round(ms / 60000));
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  return `${h}h ${String(m).padStart(2, '0')}m`;
+}
+
+function runBadgeInfo(modelLabel){
+  const now = new Date();
+  const model = forecastMeta?.model || document.getElementById('briefingModel')?.value || 'best';
+  const schedule = runScheduleForModel(model);
+  let runHour = null;
+
+  if(forecastMeta?.refTime != null){
+    runHour = Math.floor(parseInt(String(forecastMeta.refTime).padStart(4, '0'), 10) / 100);
+  } else {
+    const utcHour = now.getUTCHours();
+    runHour = schedule.filter(h => h <= utcHour).pop();
+    if(runHour == null) runHour = schedule[schedule.length - 1];
+  }
+
+  const nextHour = schedule.find(h => h > now.getUTCHours()) ?? schedule[0];
+  const next = new Date(now);
+  next.setUTCMinutes(0, 0, 0);
+  if(nextHour <= now.getUTCHours()) next.setUTCDate(next.getUTCDate() + 1);
+  next.setUTCHours(nextHour);
+
+  return {
+    primary: `${modelLabel} · run ${String(runHour).padStart(2, '0')}:00z`,
+    secondary: `${formatDuration(next - now)} to next run · ${String(nextHour).padStart(2, '0')}:00z`,
+  };
+}
+
+function setSquidHint(msg){
+  const el = document.getElementById('squidGribHint');
+  if(el) el.textContent = msg;
+}
+
+function describeGrib(grib){
+  const label = grib.modelLabel || 'Squid GRIB';
+  return `${label} | ${grib.name} | ${grib.sizeMB} MB`;
+}
+
+function handleSourceChange(){
+  const source = document.getElementById('forecastSource').value;
+  const fetchBtn = document.getElementById('fetchBtn');
+  const squidBtn = document.getElementById('squidGribBtn');
+  if(source === 'openmeteo'){
+    fetchBtn.textContent = 'Fetch Open-Meteo forecast';
+    squidBtn.textContent = 'Load Squid GRIB';
+    setStatus('yellow', 'Source set to Open-Meteo quick forecast.');
+  } else {
+    fetchBtn.textContent = 'Fetch Open-Meteo fallback';
+    squidBtn.textContent = 'Load Squid GRIB';
+    setStatus('yellow', 'Source set to Squid GRIB folder.');
+  }
+}
+
+function handleSquidSelectionChange(){
+  const sel = document.getElementById('squidGribSelect');
+  const opt = sel.options[sel.selectedIndex];
+  if(!sel.value){
+    setSquidHint('Auto mode: newest usable GRIB for current pin.');
+  } else {
+    setSquidHint('Selected: ' + (opt?.textContent || sel.value));
+  }
+}
+
+function briefIcon(type){
+  const icons = {
+    wind: '<svg viewBox="0 0 24 24"><path d="M4 8h10a3 3 0 1 0-3-3"/><path d="M4 13h15a3 3 0 1 1-3 3"/><path d="M4 18h7"/></svg>',
+    temp: '<svg viewBox="0 0 24 24"><path d="M10 14.5V5a3 3 0 0 1 6 0v9.5"/><path d="M16 14.5a5 5 0 1 1-6 0"/><path d="M13 7v8"/></svg>',
+    sky: '<svg viewBox="0 0 24 24"><path d="M7 17h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 2A3 3 0 0 0 7 17Z"/></svg>',
+    gwd: '<svg viewBox="0 0 24 24"><path d="M12 3v18"/><path d="m7 8 5-5 5 5"/><path d="M5 16c3-2 5-2 7 0s4 2 7 0"/></svg>',
+    sea: '<svg viewBox="0 0 24 24"><path d="M3 9c2.5-2 4.5-2 7 0s4.5 2 7 0 3.5-2 4 0"/><path d="M3 15c2.5-2 4.5-2 7 0s4.5 2 7 0 3.5-2 4 0"/></svg>',
+    cape: '<svg viewBox="0 0 24 24"><path d="M13 3 5 14h6l-1 7 8-12h-6l1-6Z"/></svg>',
+    data: '<svg viewBox="0 0 24 24"><path d="M5 19V5"/><path d="M5 19h14"/><path d="M9 15v-4"/><path d="M13 15V8"/><path d="M17 15v-2"/></svg>',
+  };
+  return `<span class="row-icon" aria-hidden="true">${icons[type] || icons.data}</span>`;
+}
+
+function fetchSelectedSource(){
+  const source = document.getElementById('forecastSource')?.value || 'openmeteo';
+  return source === 'grib' ? loadSquidGrib() : fetchForecast();
+}
+
+function applyVesselPreset(val){
+  if(val === 'layla'){
+    document.getElementById('vesselName').value = 'Layla';
+  }
+  renderBrief();
+}
+
+function applyEventPreset(val){
+  if(val === 'ima-sorrento'){
+    document.getElementById('eventName').value = 'IMA Maxi Europeans — Sorrento 2026';
+    document.getElementById('raceDay').value = 'Day 1';
+    document.getElementById('venueInput').value = 'Sorrento Race Area';
+    document.getElementById('venuePreset').value = '40.626,14.376,Sorrento Race Area';
+    setPosition(40.626, 14.376, { skipPresetClear: true, pan: true });
+    if(venueMap) venueMap.setZoom(11);
+  }
+  renderBrief();
+}
+
+function loadImaSorrentoPreset(){
+  document.getElementById('vesselPreset').value = 'layla';
+  document.getElementById('vesselName').value = 'Layla';
+  document.getElementById('eventPreset').value = 'ima-sorrento';
+  document.getElementById('eventName').value = 'IMA Maxi Europeans — Sorrento 2026';
+  document.getElementById('raceDay').value = 'Day 1';
+  document.getElementById('venueInput').value = 'Sorrento Race Area';
+  document.getElementById('venuePreset').value = '40.626,14.376,Sorrento Race Area';
+  setPosition(40.626, 14.376, { skipPresetClear: true, pan: true });
+  if(venueMap) venueMap.setZoom(11);
+  fetchSelectedSource();
+}
+
+function loadPreset(val){
+  if(!val) return;
+  const parts = val.split(',');
+  const lat = parseFloat(parts[0]);
+  const lon = parseFloat(parts[1]);
+  const name = parts.slice(2).join(',');
+  document.getElementById('venueInput').value = name;
+  document.getElementById('venuePreset').value = val;
+  setPosition(lat, lon, { skipPresetClear: true, pan: true });
+  if(venueMap) venueMap.setZoom(11);
+  fetchSelectedSource();
+}
+
+function buildPeriodList(){
+  const el = document.getElementById('periodList');
+  el.innerHTML = '';
+  PERIODS.forEach(p => {
+    const active = activePeriods.has(p.id);
+    const row = document.createElement('button');
+    row.type = 'button';
+    row.className = 'period-row' + (active ? ' active' : '');
+    row.innerHTML = `
+      <span class="period-check">${active ? '&#10003;' : ''}</span>
+      <span class="pr-name">${p.name}</span>
+      <span class="pr-time">${fmt12(p.from)}–${fmt12(p.to)}</span>`;
+    row.onclick = () => {
+      if(activePeriods.has(p.id)) activePeriods.delete(p.id);
+      else activePeriods.add(p.id);
+      buildPeriodList();
+      renderBrief();
+    };
+    el.appendChild(row);
+  });
+}
+
+function sliceHours(fromStr, toStr){
+  if(!forecastData) return null;
+  const fh = parseInt(fromStr.split(':')[0], 10);
+  const th = parseInt(toStr.split(':')[0], 10);
+  const idxs = forecastData.hours.reduce((acc, h, i) => {
+    if(h >= fh && h < th) acc.push(i);
+    return acc;
+  }, []);
+  if(!idxs.length) return null;
+
+  function vals(arr){
+    return idxs.map(i => arr?.[i]).filter(x => x != null && !isNaN(x));
+  }
+
+  const twdDeg = windDirMean(forecastData.twd, idxs);
+  const gwdDeg = windDirMean(forecastData.gwd, idxs);
+  const waveH = avgValue(forecastData.wave, idxs);
+  const capeMax = maxValue(forecastData.cape, idxs);
+
+  return {
+    tempMin: minValue(forecastData.temp, idxs),
+    tempMax: maxValue(forecastData.temp, idxs),
+    twsMin: minValue(forecastData.tws, idxs),
+    twsMax: maxValue(forecastData.tws, idxs),
+    gust: maxValue(forecastData.gust, idxs),
+    twdDeg,
+    twdStr: degToDir(twdDeg),
+    gwdDeg,
+    gwdStr: degToDir(gwdDeg),
+    sky: wmoSky(parseInt(modeValue(forecastData.wmo, idxs), 10)),
+    capeMax,
+    waveH,
+    sea: waveDesc(waveH),
+  };
+}
+
+async function fetchForecast(){
+  const lat = parseFloat(document.getElementById('latInput').value);
+  const lon = parseFloat(document.getElementById('lonInput').value);
+  if(isNaN(lat) || isNaN(lon)){
+    setStatus('red', 'Invalid coordinates');
+    return;
+  }
+
+  const btn = document.getElementById('fetchBtn');
+  btn.disabled = true;
+  setStatus('yellow', 'Contacting Open-Meteo…');
+
+  try {
+  const selDate = document.getElementById('fDate').value;
+  const today = new Date().toISOString().split('T')[0];
+  const targetDate = selDate || today;
+  const dateParam = `&start_date=${targetDate}&end_date=${targetDate}`;
+
+  const model = document.getElementById('briefingModel').value;
+  if(METEOFRANCE_MODELS.has(model)){
+    const maxDay = new Date();
+    maxDay.setDate(maxDay.getDate() + 4);
+    if(new Date(targetDate + 'T12:00:00') > maxDay){
+      throw new Error('Météo-France models (AROME HD, ARPEGE) have a 4-day forecast limit. Choose an earlier date.');
+    }
+  }
+  if(model === 'icon_2i'){
+    const maxDay = new Date();
+    maxDay.setDate(maxDay.getDate() + 3);
+    if(new Date(targetDate + 'T12:00:00') > maxDay){
+      throw new Error('ICON-2i (ItaliaMeteo) has a 3-day forecast limit. Choose an earlier date.');
+    }
+  }
+  const endpoints = {
+    best:     { base: 'https://api.open-meteo.com/v1/forecast', param: '' },
+    icon:     { base: 'https://api.open-meteo.com/v1/forecast', param: '&models=icon_global' },
+    icon_2i:  { base: 'https://api.open-meteo.com/v1/forecast', param: '&models=italia_meteo_arpae_icon_2i' },
+    ecmwf:    { base: 'https://api.open-meteo.com/v1/ecmwf', param: '' },
+    arome_hd: { base: 'https://api.open-meteo.com/v1/meteofrance', param: '&models=arome_france_hd' },
+    arpege:   { base: 'https://api.open-meteo.com/v1/meteofrance', param: '&models=arpege_europe' },
+    gfs:      { base: 'https://api.open-meteo.com/v1/forecast', param: '&models=gfs_seamless' },
+  };
+  const me = endpoints[model] || endpoints.best;
+
+  const weatherURL = me.base
+    + `?latitude=${lat}&longitude=${lon}`
+    + '&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,wind_direction_850hPa,wind_gusts_10m,weathercode,cape'
+    + '&timezone=Europe%2FRome&wind_speed_unit=kn'
+    + me.param + dateParam;
+
+  const marineURL = 'https://marine-api.open-meteo.com/v1/marine'
+    + `?latitude=${lat}&longitude=${lon}`
+    + '&hourly=wave_height'
+    + '&timezone=Europe%2FRome' + dateParam;
+
+    const [wRes, mRes] = await Promise.all([fetch(weatherURL), fetch(marineURL)]);
+    if(!wRes.ok) throw new Error(`Weather API ${wRes.status}`);
+
+    const wData = await wRes.json();
+    if(wData.error) throw new Error(wData.reason || 'Weather API error');
+
+    let wave = null;
+    if(mRes.ok){
+      const mData = await mRes.json();
+      wave = mData.hourly?.wave_height || null;
+    }
+
+    const twsSeries = wData.hourly?.wind_speed_10m;
+    if(MODEL_DOMAIN_MSG[model] && (!twsSeries || !twsSeries.some(v => v != null))){
+      throw new Error(MODEL_DOMAIN_MSG[model] + ' Try ECMWF or ICON 7 km.');
+    }
+
+    gribSourceLabel = null;
+    forecastData = {
+      hours: wData.hourly.time.map(t => parseInt(t.split('T')[1], 10)),
+      temp: wData.hourly.temperature_2m,
+      tws: wData.hourly.wind_speed_10m,
+      twd: wData.hourly.wind_direction_10m,
+      gwd: wData.hourly.wind_direction_850hPa,
+      gust: wData.hourly.wind_gusts_10m,
+      wmo: wData.hourly.weathercode,
+      cape: wData.hourly.cape,
+      wave,
+    };
+
+    const stamp = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    const label = MODEL_LABELS[model] || 'Auto';
+    forecastMeta = { source: 'Open-Meteo', modelLabel: label, model, date: targetDate };
+    setStatus('green', `${fmtDate(targetDate)} · ${label} · ${stamp}`);
+    document.getElementById('lastUpdated').textContent = `Fetched ${stamp} UTC local display`;
+    renderBrief();
+  } catch(e){
+    setStatus('red', 'Fetch error: ' + e.message);
+    document.getElementById('forecastDoc').innerHTML =
+      `<div class="err">Could not fetch data: ${e.message}</div>`;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function applySquidPayload(payload){
+  if(!payload || !payload.hours || !payload.hours.length){
+    throw new Error('Invalid squid_forecast.json');
+  }
+  const meta = payload.meta || {};
+  forecastData = {
+    hours: payload.hours,
+    tws: payload.tws,
+    twd: payload.twd,
+    gwd: payload.gwd || payload.hours.map(() => null),
+    gust: payload.gust,
+    temp: payload.temp || payload.hours.map(() => null),
+    wmo: payload.wmo || payload.hours.map(() => null),
+    cape: payload.cape || payload.hours.map(() => null),
+    wave: payload.wave || payload.hours.map(() => null),
+  };
+  gribSourceLabel = meta.modelLabel || 'Squid GRIB';
+  forecastMeta = { ...meta, source: 'Squid GRIB' };
+  const stamp = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  const file = meta.file || 'loaded';
+  const point = formatCoord(meta.lat, meta.lon);
+  const grid = formatCoord(meta.gridLat, meta.gridLon);
+  const run = formatRunTime(meta);
+  const gridText = grid ? `grid ${grid}${meta.gridDistanceKm != null ? ` (${meta.gridDistanceKm} km)` : ''}` : '';
+  const detail = [
+    `${gribSourceLabel}: ${file}`,
+    run ? `run ${run}` : '',
+    `${payload.hours.length} hours`,
+    point ? `pin ${point}` : '',
+    gridText,
+    meta.skippedFiles?.length ? `skipped ${meta.skippedFiles.length} newer out-of-area file(s)` : '',
+  ].filter(Boolean).join(' | ');
+  setSquidHint(detail);
+  setStatus('green', `${gribSourceLabel} · ${file} · ${stamp}`);
+  document.getElementById('lastUpdated').textContent = `GRIB loaded ${stamp}`;
+  renderBrief();
+}
+
+async function refreshSquidGribHint(){
+  const el = document.getElementById('squidGribHint');
+  const sel = document.getElementById('squidGribSelect');
+  if(!el) return;
+  if(location.protocol === 'file:'){
+    el.innerHTML = 'Double-click <strong>Start Layla.command</strong>, then use the button below.';
+    return;
+  }
+  try {
+    const res = await fetch('/api/gribs');
+    const h = await res.json();
+    if(!h.dependencyOk){
+      el.textContent = 'GRIB tools missing. Run: python3 -m pip install eccodes cfgrib';
+      return;
+    }
+    if(sel){
+      const current = sel.value;
+      sel.innerHTML = '<option value="">Best usable for pin (auto)</option>';
+      (h.gribs || []).forEach(grib => {
+        const opt = document.createElement('option');
+        opt.value = grib.name;
+        opt.textContent = describeGrib(grib);
+        sel.appendChild(opt);
+      });
+      if([...sel.options].some(opt => opt.value === current)) sel.value = current;
+    }
+    if(h.gribs?.length){
+      el.textContent = `GRIB files available: ${h.gribs.length}. Auto uses newest file that covers the pin.`;
+    } else {
+      el.textContent = 'No GRIB in Squid Gribs/ yet - download in Squid X first.';
+    }
+  } catch {
+    el.textContent = 'Start via Start Layla.command, then load GRIB.';
+  }
+}
+
+async function loadSquidGrib(){
+  const lat = parseFloat(document.getElementById('latInput').value);
+  const lon = parseFloat(document.getElementById('lonInput').value);
+  if(isNaN(lat) || isNaN(lon)){
+    setStatus('red', 'Set pin latitude and longitude first.');
+    return;
+  }
+  const btn = document.getElementById('squidGribBtn');
+  btn.disabled = true;
+  const selected = document.getElementById('squidGribSelect')?.value || '';
+  const label = selected || 'best usable GRIB';
+  setStatus('yellow', `Extracting ${label} at pin…`);
+  try {
+    if(location.protocol === 'file:'){
+      throw new Error('Open Layla via Start Layla.command (not the HTML file directly).');
+    }
+    const fileParam = selected ? `&file=${encodeURIComponent(selected)}` : '';
+    const res = await fetch(`/api/squid-grib?lat=${lat}&lon=${lon}${fileParam}&_=${Date.now()}`);
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'GRIB extract failed');
+    applySquidPayload(data);
+    refreshSquidGribHint();
+  } catch(e){
+    setStatus('red', e.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function selectedPeriodIndices(){
+  if(!forecastData?.hours?.length) return [];
+  const active = PERIODS.filter(p => activePeriods.has(p.id));
+  const idxs = [];
+  active.forEach(p => {
+    const from = parseInt(p.from.split(':')[0], 10);
+    const to = parseInt(p.to.split(':')[0], 10);
+    forecastData.hours.forEach((h, i) => {
+      if(h >= from && h < to && !idxs.includes(i)) idxs.push(i);
+    });
+  });
+  if(idxs.length) return idxs.sort((a, b) => a - b);
+  return forecastData.hours.map((_, i) => i).slice(0, 24);
+}
+
+function signedAngularDelta(fromDeg, toDeg){
+  if(fromDeg == null || toDeg == null) return null;
+  return ((toDeg - fromDeg + 540) % 360) - 180;
+}
+
+function edgeSampleIndices(idxs, side){
+  if(!idxs.length) return [];
+  const n = Math.max(1, Math.ceil(idxs.length * 0.25));
+  return side === 'end' ? idxs.slice(-n) : idxs.slice(0, n);
+}
+
+function splitSampleIndices(idxs){
+  if(idxs.length < 3) return { early: idxs, mid: idxs, late: idxs };
+  const third = Math.max(1, Math.floor(idxs.length / 3));
+  return {
+    early: idxs.slice(0, third),
+    mid: idxs.slice(third, idxs.length - third),
+    late: idxs.slice(-third),
+  };
+}
+
+function twdShiftPhrase(delta, context = 'through the period'){
+  if(delta == null || Math.abs(delta) < 8) return `TWD broadly steady ${context}`;
+  return delta < 0
+    ? `TWD backing left ${context}`
+    : `TWD veering right ${context}`;
+}
+
+function trendSummary(idxs){
+  if(!idxs.length) return { text: 'Load forecast data to generate a trend summary.' };
+  const startIdxs = edgeSampleIndices(idxs, 'start');
+  const endIdxs = edgeSampleIndices(idxs, 'end');
+  const thirds = splitSampleIndices(idxs);
+  const startTwd = windDirMean(forecastData.twd, startIdxs);
+  const endTwd = windDirMean(forecastData.twd, endIdxs);
+  const earlyTwd = windDirMean(forecastData.twd, thirds.early);
+  const midTwd = windDirMean(forecastData.twd, thirds.mid);
+  const lateTwd = windDirMean(forecastData.twd, thirds.late);
+  const startTws = avgValue(forecastData.tws, startIdxs);
+  const endTws = avgValue(forecastData.tws, endIdxs);
+  const twdDelta = signedAngularDelta(startTwd, endTwd);
+  const earlyMidDelta = signedAngularDelta(earlyTwd, midTwd);
+  const midLateDelta = signedAngularDelta(midTwd, lateTwd);
+  const twsDelta = startTws == null || endTws == null ? null : endTws - startTws;
+
+  let shiftText = twdShiftPhrase(twdDelta);
+  if(
+    earlyMidDelta != null &&
+    midLateDelta != null &&
+    Math.abs(earlyMidDelta) >= 8 &&
+    Math.abs(midLateDelta) >= 8 &&
+    Math.sign(earlyMidDelta) !== Math.sign(midLateDelta)
+  ){
+    shiftText = earlyMidDelta < 0
+      ? 'TWD shifting left early, then trending right again'
+      : 'TWD shifting right early, then trending left again';
+  }
+
+  let speedText = 'TWS steady';
+  if(twsDelta != null && Math.abs(twsDelta) >= 1.5){
+    speedText = twsDelta > 0
+      ? `TWS building ${Math.round(startTws)} to ${Math.round(endTws)} kt`
+      : `TWS easing ${Math.round(startTws)} to ${Math.round(endTws)} kt`;
+  }
+
+  return {
+    text: `${shiftText}; ${speedText}.`,
+    startTwd,
+    endTwd,
+    twdDelta,
+    startTws,
+    endTws,
+    twsDelta,
+  };
+}
+
+function renderDailyOverview(modelLabel, sourceNote, coordMeta, venue, dateVal, note, vessel, eventName, raceDay){
+  if(!forecastData) return '';
+  const idxs = selectedPeriodIndices();
+  const trend = trendSummary(idxs);
+  const twdDeg = windDirMean(forecastData.twd, idxs);
+  const gwdDeg = windDirMean(forecastData.gwd, idxs);
+  const twsMin = minValue(forecastData.tws, idxs);
+  const twsMax = maxValue(forecastData.tws, idxs);
+  const gustMax = maxValue(forecastData.gust, idxs);
+  const tempMin = minValue(forecastData.temp, idxs);
+  const tempMax = maxValue(forecastData.temp, idxs);
+  const waveH = avgValue(forecastData.wave, idxs);
+  const sky = wmoSky(parseInt(modeValue(forecastData.wmo, idxs), 10));
+  const run = formatRunTime(forecastMeta);
+  const twdText = twdDeg == null ? '—' : `${degToDir(twdDeg)} ${Math.round(twdDeg)}°`;
+  const gwdText = gwdDeg == null ? '—' : `${degToDir(gwdDeg)} ${Math.round(gwdDeg)}°`;
+  const directionTrend = trend.startTwd == null || trend.endTwd == null
+    ? '—'
+    : `${degToDir(trend.startTwd)} ${Math.round(trend.startTwd)}° → ${degToDir(trend.endTwd)} ${Math.round(trend.endTwd)}°`;
+  const speedTrend = trend.startTws == null || trend.endTws == null
+    ? '—'
+    : `${Math.round(trend.startTws)} → ${Math.round(trend.endTws)} kt`;
+  const conditions = [sky && sky !== 'Variable' ? sky : '', waveH != null ? `${waveDesc(waveH)} sea ${waveH.toFixed(1)} m` : '', tempMin != null ? `${fmtRange(tempMin, tempMax, '°C')}` : ''].filter(Boolean).join(' · ') || coordMeta.replace(' · ', '') || '—';
+  const hours = idxs.map(i => forecastData.hours[i]).filter(h => h != null);
+  const windowText = hours.length
+    ? `${Math.min(...hours)}:00–${Math.max(...hours) + 1}:00 · ${hours.length} hourly samples`
+    : 'Selected periods';
+  const dateText = dateVal ? fmtDate(dateVal) : '';
+  const cleanCoord = coordMeta.replace(' · ', '');
+  const runInfo = runBadgeInfo(modelLabel);
+
+  return `<section class="daily-card">
+    <div class="daily-top">
+      <div>
+        <div class="daily-kicker">Daily Briefing</div>
+        <div class="daily-title"><span class="boat-name">${escapeHtml(vessel)}</span></div>
+        <div class="daily-context">
+          ${eventName ? `<span>${escapeHtml(eventName)}</span>` : ''}
+          ${raceDay ? `<span>${escapeHtml(raceDay)}</span>` : ''}
+          ${venue ? `<span>${escapeHtml(venue)}</span>` : ''}
+          ${dateText ? `<span>${escapeHtml(dateText)}</span>` : ''}
+          ${cleanCoord ? `<span>${escapeHtml(cleanCoord)}</span>` : ''}
+        </div>
+        <div class="daily-trend"><strong>${escapeHtml(trend.text)}</strong></div>
+        ${note ? `<div class="daily-note">${escapeHtml(note)}</div>` : ''}
+      </div>
+      <div class="daily-badge">
+        <div class="run-main">${escapeHtml(runInfo.primary)}</div>
+        <div class="run-sub">${escapeHtml(runInfo.secondary)}</div>
+      </div>
+    </div>
+    <div class="daily-grid">
+      <div class="metric">
+        <div class="metric-label">TWD Trend</div>
+        <div class="metric-value single">${escapeHtml(directionTrend)}</div>
+        <div class="metric-detail">Early to late selected-period mean</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">TWS Trend</div>
+        <div class="metric-value single">${escapeHtml(speedTrend)}</div>
+        <div class="metric-detail">Range ${escapeHtml(fmtRange(twsMin, twsMax, ' kt'))}</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Gust</div>
+        <div class="metric-value single">${gustMax == null ? '—' : `${Math.round(gustMax)} kt`}</div>
+        <div class="metric-detail">Peak across selected period</div>
+      </div>
+    </div>
+    <div class="brief-strip">
+      <div class="brief-item">
+        <div class="brief-label">Conditions</div>
+        <div class="brief-value">${escapeHtml(conditions)}</div>
+      </div>
+      <div class="brief-item">
+        <div class="brief-label">Window</div>
+        <div class="brief-value">${escapeHtml(windowText)}</div>
+      </div>
+    </div>
+  </section>`;
+}
+
+function renderBrief(){
+  const vessel = document.getElementById('vesselName')?.value.trim() || 'Layla';
+  const eventName = document.getElementById('eventName')?.value.trim() || '';
+  const raceDay = document.getElementById('raceDay')?.value.trim() || '';
+  const venue = document.getElementById('venueInput').value || 'Venue';
+  const dateVal = document.getElementById('fDate').value;
+  const note = document.getElementById('fNote').value.trim();
+  const footer = document.getElementById('fFooter').value.trim();
+  const model = document.getElementById('briefingModel').value;
+  const modelLabel = gribSourceLabel || MODEL_LABELS[model] || 'Auto';
+  const sourceNote = gribSourceLabel ? 'Squid GRIB' : 'Open-Meteo · Europe/Rome';
+  const lat = parseFloat(document.getElementById('latInput').value);
+  const lon = parseFloat(document.getElementById('lonInput').value);
+  const coordMeta = (!isNaN(lat) && !isNaN(lon))
+    ? `${Math.abs(lat).toFixed(3)}°${lat >= 0 ? 'N' : 'S'} ${Math.abs(lon).toFixed(3)}°${lon >= 0 ? 'E' : 'W'} · `
+    : '';
+
+  let html = forecastData ? '' : `<header class="f-header">
+    <div class="f-venue">${escapeHtml(vessel)}</div>
+    ${dateVal ? `<div class="f-date">${fmtDate(dateVal)}</div>` : ''}
+    <div class="f-meta">${[eventName, raceDay, venue].filter(Boolean).map(escapeHtml).join(' · ')}</div>
+    <div class="f-meta">${coordMeta}${modelLabel} · ${sourceNote}</div>
+    ${note ? `<div class="f-note">${escapeHtml(note)}</div>` : ''}
+  </header>`;
+
+  if(forecastData){
+    html += renderDailyOverview(modelLabel, sourceNote, coordMeta, venue, dateVal, note, vessel, eventName, raceDay);
+  }
+
+  const active = PERIODS.filter(p => activePeriods.has(p.id));
+  if(!active.length){
+    html += '<div class="empty">Select at least one period.</div>';
+  } else {
+    html += `<div class="day-row-title">${dateVal ? fmtDate(dateVal).split(' ')[0] : 'Daily'} <span>${dateVal ? fmtDate(dateVal).replace(/^[^ ]+ /, '') : 'Selected briefing periods'}</span></div>`;
+  }
+
+  active.forEach((p, idx) => {
+    const d = sliceHours(p.from, p.to);
+    const cls = 'pcard c' + Math.min(idx, 5);
+    if(!d){
+      html += `<article class="${cls}">
+        <div class="pt-row"><span class="pt-name">${p.name}</span><span class="pt-time">${fmt12(p.from)}–${fmt12(p.to)}</span></div>
+        <div class="frow">${briefIcon('data')}<span>No data — fetch forecast first.</span></div>
+      </article>`;
+      return;
+    }
+    const gwdPart = d.gwdDeg != null
+      ? `<strong>${d.gwdStr}</strong> (${Math.round(d.gwdDeg)}°)`
+      : '—';
+    const wavePart = d.waveH != null ? ` · waves <strong>${d.waveH.toFixed(1)} m</strong>` : '';
+    const twsPart = fmtRange(d.twsMin, d.twsMax, ' kt');
+    const gustPart = d.gust == null ? '—' : `${Math.round(d.gust)} kt`;
+    const tempOnly = d.tempMin != null && d.tempMax != null ? fmtRange(d.tempMin, d.tempMax, '°C') : '—';
+    const windText = `TWD <strong>${d.twdStr}</strong>${d.twdDeg == null ? '' : ` ${Math.round(d.twdDeg)}°`} · TWS <strong>${twsPart}</strong> · gusts ${gustPart}`;
+    const skyText = d.sky && d.sky !== 'Variable' ? escapeHtml(d.sky) : '—';
+    const seaText = d.waveH != null ? `${d.sea}${wavePart}` : '—';
+    const capeText = d.capeMax == null
+      ? '—'
+      : `<span class="cape-pill ${capeClass(d.capeMax)}">${Math.round(d.capeMax)} J/kg</span> ${capeLabel(d.capeMax)}`;
+
+    html += `<article class="${cls}">
+      <div class="pt-row">
+        <span class="pt-name">${p.name}</span>
+        <span class="pt-time">${fmt12(p.from)} – ${fmt12(p.to)}</span>
+      </div>
+      <div class="frow">${briefIcon('wind')}<span>${windText}</span></div>
+      <div class="frow">${briefIcon('temp')}<span>${tempOnly}</span></div>
+      <div class="frow">${briefIcon('sky')}<span>${skyText}</span></div>
+      <div class="frow">${briefIcon('cape')}<span>CAPE ${capeText}</span></div>
+      <div class="frow">${briefIcon('gwd')}<span>${gwdPart}</span></div>
+      <div class="frow">${briefIcon('sea')}<span>${seaText}</span></div>
+    </article>`;
+  });
+
+  if(footer) html += `<footer class="f-footer">${escapeHtml(footer)}</footer>`;
+  document.getElementById('forecastDoc').innerHTML = html;
+}
+
+function escapeHtml(s){
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+document.getElementById('fDate').value = new Date().toISOString().split('T')[0];
+['fDate','fNote','fFooter','venueInput','briefingModel','forecastSource','vesselName','eventName','raceDay'].forEach(id => {
+  document.getElementById(id).addEventListener('change', renderBrief);
+  document.getElementById(id).addEventListener('input', renderBrief);
+});
+
+document.getElementById('latInput').addEventListener('change', () => {
+  const lat = parseFloat(document.getElementById('latInput').value);
+  const lon = parseFloat(document.getElementById('lonInput').value);
+  if(!isNaN(lat) && !isNaN(lon)) setPosition(lat, lon, { skipPresetClear: false, pan: false });
+});
+document.getElementById('lonInput').addEventListener('change', () => {
+  const lat = parseFloat(document.getElementById('latInput').value);
+  const lon = parseFloat(document.getElementById('lonInput').value);
+  if(!isNaN(lat) && !isNaN(lon)) setPosition(lat, lon, { skipPresetClear: false, pan: false });
+});
+document.addEventListener('click', e => {
+  const box = document.querySelector('.map-wrap');
+  if(box && !box.contains(e.target)) document.getElementById('searchResults').style.display = 'none';
+});
+
+buildPeriodList();
+refreshSavedSpotsSelect();
+initVenueMap();
+renderBrief();
+refreshSquidGribHint();
+handleSourceChange();
+</script>
+</body>
+</html>

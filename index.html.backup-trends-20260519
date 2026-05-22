@@ -1,0 +1,3894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Layla — Navigation Brief | 2026 IMA Maxi Europeans</title>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<style>
+:root{
+  --bg:#fff;--surface:#fff;--border:#d7dce2;--motion:#e6e9ed;
+  --text:#28251d;--muted:#7a7974;--inv:#fff;--err:#b64a4a;--gold:#d79a2b;--blue:#4f7fb2;--green:#10b981;
+  --primary:#2f5f8f;--primary-h:#243f63;
+  --r-md:.5rem;--r-lg:.75rem;--r-xl:1rem;
+  --s1:.25rem;--s2:.5rem;--s3:.75rem;--s4:1rem;--s5:1.25rem;--s6:1.5rem;--s8:2rem;
+  --xs:.8125rem;--sm:.9375rem;--base:1rem;--lg:1.35rem;
+  --font:'Satoshi','Helvetica Neue',sans-serif;
+  --sidebar-width:440px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased}
+body{
+  min-height:100dvh;font-family:var(--font);font-size:var(--sm);color:var(--text);background:var(--bg);
+  display:grid;grid-template-columns:1fr;grid-template-rows:auto 1fr;height:100dvh;overflow:hidden;
+}
+body.sidebar-collapsed{--sidebar-width:0px}
+.app-body{
+  display:grid;grid-template-columns:var(--sidebar-width) 1fr;min-height:0;overflow:hidden;
+}
+.sidebar-panel{
+  display:flex;min-width:0;max-width:100%;overflow:hidden;
+  border-right:1px solid var(--motion);background:var(--surface);
+}
+body.sidebar-collapsed .sidebar-panel{border-right:none}
+body.sidebar-collapsed .sidebar-resizer{display:none}
+body.sidebar-collapsed aside{opacity:0;pointer-events:none;padding:0}
+.sidebar-resizer{
+  width:6px;flex-shrink:0;cursor:col-resize;background:var(--motion);
+  transition:background .15s;
+}
+.sidebar-resizer:hover,.sidebar-resizer.dragging{background:var(--primary)}
+.icon-btn{
+  width:34px;height:34px;border-radius:var(--r-md);display:inline-flex;align-items:center;
+  justify-content:center;color:var(--muted);border:1px solid var(--border);
+}
+.icon-btn:hover{background:var(--motion);color:var(--text)}
+input,select,textarea,button{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:none}
+
+header{
+  grid-column:1/-1;background:var(--surface);border-bottom:1px solid var(--motion);
+  padding:var(--s3) var(--s6);display:flex;align-items:center;justify-content:space-between;gap:var(--s4);
+}
+.logo-name{font-size:var(--base);font-weight:700;letter-spacing:-.01em}
+.logo-sub{font-size:var(--xs);color:var(--muted)}
+.hdr-actions{display:flex;align-items:center;gap:var(--s2)}
+.btn{
+  display:inline-flex;align-items:center;gap:var(--s2);padding:var(--s2) var(--s4);
+  border-radius:var(--r-md);font-size:var(--sm);font-weight:500;
+}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-h)}
+.btn-primary:disabled{opacity:.45;cursor:not-allowed}
+.btn-squid{background:#2f5f8f;color:#fff;width:100%}
+.btn-squid:hover{background:var(--primary-h)}
+.btn-squid:disabled{opacity:.45;cursor:not-allowed}
+.btn-ghost{color:var(--muted);border:1px solid var(--border)}
+.btn-ghost:hover{background:#dedad4;color:var(--text)}
+
+aside{
+  flex:1;min-width:0;overflow-y:auto;padding:var(--s5);display:flex;flex-direction:column;gap:var(--s5);
+}
+aside::-webkit-scrollbar{width:4px}
+aside::-webkit-scrollbar-thumb{background:var(--motion);border-radius:4px}
+.app-body > main{min-width:0;min-height:0;overflow:hidden;display:flex;flex-direction:column}
+.sec-label{
+  font-size:var(--xs);font-weight:600;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.07em;margin-bottom:var(--s2);
+}
+.fg{display:flex;flex-direction:column;gap:var(--s1);margin-bottom:var(--s3)}
+.fg label{font-size:var(--xs);font-weight:500;color:var(--muted)}
+.fc{
+  padding:var(--s2) var(--s3);border:1px solid var(--border);border-radius:var(--r-md);
+  background:var(--bg);width:100%;
+}
+.fc:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(47,95,143,.16)}
+.team-copy-box{
+  min-height:150px;resize:vertical;font-size:11px;line-height:1.35;
+  white-space:pre-wrap;font-family:var(--font);
+}
+.team-brief-visual{display:flex;flex-direction:column;gap:var(--s3);margin-top:var(--s3)}
+.team-brief-visual .f-header{padding:var(--s3);border-radius:var(--r-lg)}
+.team-brief-visual .f-venue{font-size:var(--base)}
+.team-period-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3)}
+.team-brief-visual .pcard{padding:var(--s3);border-radius:var(--r-lg);box-shadow:0 3px 10px rgba(40,37,29,.12)}
+.team-brief-visual .pt-row{margin-bottom:var(--s2)}
+.team-brief-visual .frow{font-size:var(--xs)}
+.team-visual-hint{font-size:10px;color:var(--muted);line-height:1.35;margin-top:var(--s2)}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2)}
+.status-row{display:flex;align-items:center;gap:var(--s2);font-size:var(--xs);color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border)}
+.dot.green{background:#4f7fb2}.dot.yellow{background:#d79a2b}.dot.red{background:#b64a4a}
+
+.period-list{display:flex;flex-direction:column;gap:var(--s2)}
+.period-row{
+  display:flex;align-items:center;gap:var(--s3);padding:var(--s3);
+  border:1px solid var(--border);border-radius:var(--r-md);background:var(--bg);cursor:pointer;
+}
+.period-row.active{border-color:var(--primary);background:rgba(47,95,143,.08)}
+.period-check{
+  width:18px;height:18px;border-radius:4px;border:1.5px solid var(--border);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.period-row.active .period-check{background:var(--primary);border-color:var(--primary)}
+.pr-name{font-weight:600;font-size:var(--sm);flex:1}
+.pr-time{font-size:var(--xs);color:var(--muted)}
+
+.map-wrap{position:relative;margin-bottom:var(--s3)}
+#venueMap{height:220px;border-radius:var(--r-lg);border:1px solid var(--border);background:var(--bg);z-index:0}
+#venueMap .leaflet-container{border-radius:var(--r-lg);font-family:var(--font)}
+.map-hint{font-size:10px;color:var(--muted);line-height:1.4;margin-top:var(--s2)}
+.search-results{
+  position:absolute;left:0;right:0;top:100%;z-index:1000;margin-top:2px;
+  background:var(--bg);border:1px solid var(--border);border-radius:var(--r-md);
+  box-shadow:0 8px 24px rgba(40,37,29,.12);max-height:160px;overflow-y:auto;display:none;
+}
+.search-result{
+  display:block;width:100%;text-align:left;padding:var(--s2) var(--s3);
+  border-bottom:1px solid var(--motion);font-size:var(--xs);
+}
+.search-result:hover{background:var(--surface)}
+.search-result:last-child{border-bottom:none}
+.sr-name{font-weight:600;color:var(--text)}
+.sr-sub{color:var(--muted);font-size:10px;margin-top:1px}
+.nudge-row{display:flex;flex-wrap:wrap;gap:var(--s1);margin-top:var(--s2)}
+.nudge-btn{
+  padding:3px 8px;font-size:10px;font-weight:600;border:1px solid var(--border);
+  border-radius:var(--r-md);background:var(--bg);color:var(--muted);
+}
+.nudge-btn:hover{border-color:var(--primary);color:var(--primary)}
+.coord-readout{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:var(--s1)}
+.manage-row{display:flex;gap:var(--s2);margin-top:var(--s1)}
+.manage-row .btn{flex:1;font-size:var(--xs);justify-content:center}
+.manage-list{
+  margin-top:var(--s2);border:1px solid var(--border);border-radius:var(--r-md);
+  background:var(--bg);max-height:160px;overflow-y:auto;
+}
+.manage-item{
+  display:flex;align-items:center;gap:var(--s2);padding:var(--s2) var(--s3);
+  border-bottom:1px solid var(--motion);font-size:var(--xs);
+}
+.manage-item:last-child{border-bottom:none}
+.manage-item-main{flex:1;min-width:0}
+.manage-item-name{font-weight:600;color:var(--text)}
+.manage-item-sub{color:var(--muted);font-size:10px;margin-top:1px}
+.manage-item-actions{display:flex;gap:var(--s1);flex-shrink:0}
+.manage-item-actions .btn{padding:2px 8px;font-size:10px}
+.manage-empty{padding:var(--s3);color:var(--muted);font-size:var(--xs);text-align:center}
+.manage-clear{
+  padding:var(--s2) var(--s3);border-top:1px solid var(--motion);
+  font-size:var(--xs);
+}
+.manage-clear .btn{width:100%;justify-content:center;font-size:var(--xs)}
+
+.toolbar{
+  flex-shrink:0;padding:var(--s4) var(--s6);border-bottom:1px solid var(--motion);background:var(--surface);
+  display:flex;align-items:center;justify-content:space-between;gap:var(--s4);
+}
+.toolbar h2{font-size:var(--base);font-weight:600}
+.tab-bar{display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap}
+.tab-btn{
+  padding:var(--s2) var(--s4);border:1px solid var(--border);border-radius:var(--r-md);
+  color:var(--muted);font-size:var(--xs);font-weight:600;background:var(--surface);
+}
+.tab-btn.active{background:var(--primary);border-color:var(--primary);color:var(--inv)}
+.preview-area{
+  flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;
+  padding:var(--s8) var(--s6);display:flex;justify-content:center;align-items:flex-start;
+}
+.preview-area::-webkit-scrollbar{width:8px}
+.preview-area::-webkit-scrollbar-thumb{background:var(--motion);border-radius:4px}
+.preview-area::-webkit-scrollbar-thumb:hover{background:var(--border)}
+.forecast-doc{width:100%;max-width:760px;display:flex;flex-direction:column;gap:var(--s4);flex-shrink:0}
+.compare-panel{width:100%;max-width:980px;display:none;flex-direction:column;gap:var(--s4);flex-shrink:0}
+.compare-head{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);
+  padding:var(--s4) var(--s5);display:flex;align-items:center;justify-content:space-between;gap:var(--s4);
+}
+.compare-title{font-size:var(--lg);font-weight:800;letter-spacing:-.02em}
+.compare-sub{font-size:var(--xs);color:var(--muted);margin-top:var(--s1)}
+.compare-actions{display:flex;align-items:flex-end;gap:var(--s3);flex-wrap:wrap;justify-content:flex-end}
+.compare-source{min-width:calc(var(--s12) * 3);margin-bottom:0}
+.compare-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--s4)}
+.compare-hour-row{display:none}
+.chr-wrap{display:flex;align-items:center;gap:var(--s3);width:100%}
+.chr-label-wrap{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+.chr-label{
+  font-size:var(--sm);font-weight:800;background:var(--primary);color:var(--inv);
+  padding:var(--s1) var(--s3);border-radius:var(--r-md);white-space:nowrap;
+}
+.chr-sublabel{font-size:var(--xs);color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:var(--s1);white-space:nowrap}
+.chr-slider{
+  flex:1;appearance:none;height:var(--s1);border-radius:var(--r-full);
+  background:linear-gradient(to right,var(--primary) 0%,var(--border) 0%);outline:none;cursor:pointer;
+}
+.chr-slider::-webkit-slider-thumb{
+  appearance:none;width:var(--s5);height:var(--s5);border-radius:var(--r-full);
+  background:var(--primary);border:2px solid var(--surface);box-shadow:var(--sha-sm);cursor:pointer;
+}
+.chr-slider::-moz-range-thumb{
+  width:var(--s5);height:var(--s5);border-radius:var(--r-full);
+  background:var(--primary);border:2px solid var(--surface);cursor:pointer;
+}
+.compare-skipped{
+  border:1px solid var(--border);border-radius:var(--r-lg);background:var(--surface);
+  padding:var(--s3) var(--s4);display:none;color:var(--muted);font-size:var(--xs);
+}
+.compare-skipped strong{color:var(--text)}
+.compare-agreement{
+  border:1px solid var(--border);border-radius:var(--r-xl);background:var(--surface);
+  padding:var(--s4) var(--s5);display:none;flex-direction:column;gap:var(--s3);
+}
+.compare-chart-wrap{
+  border:1px solid var(--border);border-radius:var(--r-xl);background:var(--surface);
+  padding:var(--s4) var(--s5);display:none;width:100%;box-sizing:border-box;
+}
+.compare-chart-title{font-size:var(--sm);font-weight:800;margin-bottom:var(--s3)}
+.compare-chart-title:not(:first-child){margin-top:var(--s4)}
+.compare-chart-wrap canvas{display:block;width:100%;box-sizing:border-box;touch-action:none}
+.compare-chart-legend{display:flex;gap:var(--s4);flex-wrap:wrap;margin-top:var(--s3)}
+.mcl-item{display:flex;align-items:center;gap:var(--s2);font-size:var(--xs);color:var(--muted)}
+.mcl-dot{width:var(--s3);height:var(--s3);border-radius:var(--r-full);flex-shrink:0}
+.agree-title{font-size:var(--sm);font-weight:800}
+.agree-note{font-size:var(--xs);color:var(--muted)}
+.agree-row{display:flex;align-items:center;gap:var(--s3);font-size:var(--xs)}
+.agr-lbl{width:96px;flex-shrink:0;color:var(--text);font-weight:700}
+.agr-spread{width:64px;flex-shrink:0;text-align:right;white-space:nowrap}
+.agr-avg{width:96px;flex-shrink:0;text-align:right;white-space:nowrap;color:var(--muted)}
+.agree-bar-wrap{flex:1;height:var(--s2);background:var(--surface2);border-radius:var(--r-full);overflow:hidden}
+.agree-bar{height:100%;border-radius:var(--r-full);transition:width var(--tr)}
+.agree-good{background:var(--green)}
+.agree-ok{background:var(--gold)}
+.agree-poor{background:var(--err)}
+.compare-card{
+  border:1px solid var(--border);border-radius:var(--r-xl);background:var(--surface);
+  border-left:var(--s1) solid var(--model-col,var(--border));
+  padding:var(--s4);box-shadow:0 2px 8px rgba(40,37,29,.07);
+}
+.compare-model-row{display:flex;align-items:center;gap:var(--s2);flex-wrap:nowrap;margin-bottom:var(--s3);min-width:0}
+.compare-model-main{display:flex;align-items:center;gap:var(--s2);flex-wrap:nowrap;min-width:0}
+.compare-model{font-size:var(--base);font-weight:800;color:var(--model-col,var(--text));white-space:nowrap;flex:0 0 auto}
+.compare-badge{
+  font-size:var(--xs);color:var(--model-col,var(--muted));text-transform:uppercase;letter-spacing:.06em;
+  border:1px solid var(--model-col,var(--border));border-radius:var(--r-full);padding:var(--s1) var(--s2);white-space:nowrap;flex:0 0 auto;
+}
+.compare-meta{display:flex;flex-wrap:nowrap;gap:var(--s2);font-size:var(--xs);color:var(--muted);min-width:0;overflow:hidden}
+.compare-meta span{border:1px solid var(--model-col,var(--border));border-radius:var(--r-full);padding:var(--s1) var(--s2);background:var(--surface2);white-space:nowrap}
+.compare-meta strong{color:var(--model-col,var(--text));font-weight:800}
+.compare-data-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s2)}
+.compare-data-cell{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--s1);
+  padding:var(--s3) var(--s2);background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--r-md);text-align:center;min-height:var(--s12);
+}
+.compare-data-val{font-size:var(--lg);font-weight:800;color:var(--text);line-height:1.1}
+.compare-data-label{font-size:var(--xs);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.compare-cell-rain{border-color:var(--blue)}
+.compare-cell-wave{border-color:var(--green)}
+.wind-speed-val{color:var(--wind-col,var(--text));font-weight:900}
+.pcard .wind-speed-val{
+  display:inline-flex;align-items:center;border-radius:999px;padding:1px 7px;margin:0 1px;
+  background:rgba(255,255,255,.92);border:1px solid rgba(255,255,255,.35);
+  text-shadow:none;
+}
+.compare-val-rain{color:var(--blue)}
+.compare-val-wave{color:var(--green)}
+.compare-card-note{font-size:var(--xs);color:var(--muted);margin-top:var(--s3)}
+.compare-period{border-top:1px solid var(--motion);padding:var(--s2) 0}
+.compare-period:first-of-type{border-top:none}
+.compare-period-title{font-size:var(--xs);font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.compare-period-main{font-size:var(--sm);font-weight:700;margin-top:2px}
+.compare-period-sub{font-size:var(--xs);color:var(--muted);margin-top:1px}
+.field-source{font-size:var(--xs);color:var(--muted);font-weight:600;margin-left:var(--s1)}
+.hybrid-note{font-size:var(--xs);color:var(--muted);margin-top:var(--s2);line-height:1.4}
+.f-header{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);
+  padding:var(--s4) var(--s5);box-shadow:0 1px 2px rgba(40,37,29,.06);
+}
+.f-venue{font-size:var(--lg);font-weight:700;letter-spacing:-.02em}
+.f-date{font-size:var(--sm);color:var(--muted);margin-top:var(--s1)}
+.f-meta{font-size:var(--xs);color:var(--muted);margin-top:var(--s2)}
+.f-note{font-size:var(--sm);color:var(--muted);margin-top:var(--s2)}
+
+.daily-card{
+  grid-column:1/-1;
+  background:linear-gradient(150deg,#f7f4ee,#e5e0d8);
+  border:1px solid var(--primary);border-radius:var(--r-xl);
+  box-shadow:0 8px 24px rgba(40,37,29,.10);overflow:hidden;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
+}
+.daily-top{
+  background:linear-gradient(135deg,#2b5f91,#26384f);
+  color:#fff;padding:var(--s5);display:grid;grid-template-columns:1fr auto;gap:var(--s4);
+}
+.daily-kicker{font-size:10px;text-transform:uppercase;letter-spacing:.08em;opacity:.78;font-weight:700}
+.daily-title{font-size:2.15rem;font-weight:750;letter-spacing:-.045em;margin-top:var(--s1)}
+.daily-sub{font-size:var(--sm);line-height:1.45;opacity:.86;margin-top:var(--s2)}
+.boat-name{color:var(--inv)}
+.daily-badge{
+  justify-self:end;align-self:start;border:1px solid rgba(255,255,255,.28);
+  border-radius:var(--r-md);padding:7px 10px;background:rgba(255,255,255,.08);
+  text-align:left;min-width:0;white-space:nowrap;
+}
+.run-main{font-size:var(--sm);font-weight:800;letter-spacing:.01em}
+.run-sub{font-size:var(--xs);opacity:.78;margin-top:2px}
+.run-sub strong{font-weight:800;opacity:1}
+.daily-note{font-size:var(--sm);line-height:1.45;opacity:.86;margin-top:var(--s2)}
+.daily-subtle{opacity:.70}
+.daily-detail{background:#fff;padding:var(--s4) var(--s5);border-top:1px solid var(--primary)}
+.daily-detail-list{display:flex;flex-direction:column;gap:var(--s3)}
+.daily-detail-row{
+  display:flex;align-items:flex-start;gap:var(--s2);font-size:var(--sm);line-height:1.45;color:var(--text);
+}
+.daily-detail-row .row-icon{flex:0 0 17px;color:var(--muted);margin-top:2px;opacity:1}
+.daily-detail-row .row-icon svg{stroke:var(--muted)}
+.daily-detail-row strong{font-weight:600}
+.daily-detail .cape-pill{
+  background:var(--motion);border:1px solid var(--border);color:inherit;
+}
+.daily-source{
+  font-size:var(--xs);color:var(--muted);margin-top:var(--s3);padding-top:var(--s3);
+  border-top:1px solid var(--motion);line-height:1.4;
+}
+.brief-strip.window-only{grid-template-columns:1fr}
+.daily-context{
+  display:flex;align-items:center;gap:var(--s3);flex-wrap:wrap;
+  font-size:var(--sm);opacity:.72;margin-top:var(--s1);
+}
+.daily-context span{white-space:nowrap}
+.daily-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--primary);border-top:1px solid var(--primary)}
+.metric{background:#fff;padding:var(--s4);min-height:82px}
+.metric-label{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700}
+.metric-value{font-size:1.45rem;font-weight:700;letter-spacing:-.03em;margin-top:var(--s2)}
+.metric-value.long{font-size:1.05rem;line-height:1.25;letter-spacing:-.01em}
+.metric-value.single{font-size:1.25rem;line-height:1.2;white-space:nowrap}
+.metric-detail{font-size:var(--xs);color:var(--muted);line-height:1.35;margin-top:var(--s1)}
+.brief-strip{
+  display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--primary);
+  border-top:1px solid var(--primary);
+}
+.brief-item{background:#fff;padding:var(--s3) var(--s4)}
+.brief-label{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700}
+.brief-value{font-size:var(--sm);font-weight:600;margin-top:2px}
+.day-row-title{
+  display:flex;align-items:baseline;gap:var(--s2);
+  margin-top:var(--s2);font-size:1.15rem;font-weight:800;color:#102f38;letter-spacing:-.02em;
+}
+.day-row-title span{font-size:var(--xs);font-weight:600;color:var(--muted);letter-spacing:0}
+
+.pcard{
+  border-radius:var(--r-xl);padding:var(--s4) var(--s5);color:#fff;
+  box-shadow:0 4px 12px rgba(40,37,29,.12);
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
+}
+.pcard.c0{background:linear-gradient(160deg,#4a78be,#5b90d8)}
+.pcard.c1{background:linear-gradient(160deg,#3f7db2,#5794c8)}
+.pcard.c2{background:linear-gradient(160deg,#5579b8,#6e93cc)}
+.pcard.c3{background:linear-gradient(160deg,#4e6ea8,#6584be)}
+.pcard.c4{background:linear-gradient(160deg,#3a5898,#4f74b8)}
+.pcard.c5{background:linear-gradient(160deg,#102d57,#203f73)}
+.pt-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:var(--s3)}
+.pt-name{font-size:var(--base);font-weight:700}
+.pt-time{font-size:var(--xs);opacity:.85}
+.frow{
+  font-size:var(--sm);line-height:1.5;padding:var(--s1) 0;border-top:1px solid rgba(255,255,255,.15);
+  display:flex;align-items:flex-start;gap:var(--s2);
+}
+.frow:first-of-type{border-top:none;padding-top:0}
+.row-icon{
+  width:17px;height:17px;flex:0 0 17px;opacity:.72;margin-top:2px;
+}
+.row-icon svg{display:block;width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.frow strong{font-weight:600}
+.cape-pill{
+  display:inline-flex;align-items:center;border-radius:999px;padding:1px 7px;margin-left:2px;
+  background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.24);font-weight:700;
+}
+.cape-low{color:#d9e2ea}.cape-watch{color:#f6d98b}.cape-active{color:#f2a36e}.cape-high{color:#ff8f8f}
+.f-footer{font-size:var(--xs);color:var(--muted);text-align:center;padding-top:var(--s2)}
+
+.empty{padding:var(--s8);text-align:center;color:var(--muted);font-size:var(--sm)}
+.err{
+  padding:var(--s4);border:1px solid #ef4444;border-radius:var(--r-lg);
+  background:rgba(239,68,68,.08);color:#991b1b;font-size:var(--sm);
+}
+
+@page{size:A4 landscape;margin:8mm}
+@media print{
+  aside,header,.toolbar,.sidebar-panel,.sidebar-resizer,.no-print{display:none!important}
+  .app-body{grid-template-columns:1fr!important}
+  body{display:block;height:auto;overflow:visible}
+  main{overflow:visible}
+  .preview-area{overflow:visible;padding:0}
+  .forecast-doc{max-width:none;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .f-header{grid-column:1/-1}
+  .daily-card{grid-column:1/-1}
+  .pcard{break-inside:avoid;page-break-inside:avoid}
+  html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+@media(max-width:900px){
+  body{height:auto;overflow:auto}
+  .app-body{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+  .sidebar-panel{border-right:none;border-bottom:1px solid var(--motion)}
+  .sidebar-resizer{display:none}
+  aside{max-height:55vh}
+  .daily-top,.brief-strip{grid-template-columns:1fr}
+  .team-period-grid{grid-template-columns:1fr}
+  .compare-grid{grid-template-columns:1fr}
+  .daily-badge{justify-self:start}
+}
+</style>
+</head>
+<body>
+
+<header class="no-print">
+  <div style="display:flex;align-items:center;gap:var(--s3)">
+    <button type="button" class="icon-btn" id="sidebarToggle" onclick="toggleSidebar()" title="Toggle setup panel" aria-label="Toggle setup panel">
+      <svg id="sidebarToggleIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+    </button>
+    <div>
+      <div class="logo-name">Layla</div>
+      <div class="logo-sub">Navigation Brief · 2026 IMA Maxi Europeans</div>
+    </div>
+  </div>
+  <div class="hdr-actions">
+    <button type="button" class="btn btn-ghost" onclick="window.print()">Print A4</button>
+  </div>
+</header>
+
+<div class="app-body">
+<div class="sidebar-panel no-print" id="sidebarPanel">
+<aside>
+  <section>
+    <div class="sec-label">Event</div>
+    <div class="fg">
+      <label for="eventPreset">Event</label>
+      <select id="eventPreset" class="fc" onchange="onEventPresetChange()"></select>
+    </div>
+    <div class="fg">
+      <label for="eventName">Event name</label>
+      <input id="eventName" class="fc" type="text" value="" placeholder="Event name">
+    </div>
+    <div class="fg">
+      <label for="raceDay">Race day</label>
+      <input id="raceDay" class="fc" type="text" value="" placeholder="e.g. Day 1">
+    </div>
+    <div class="manage-row">
+      <button type="button" id="saveEventBtn" class="btn btn-ghost" onclick="saveCustomEvent()">Save event</button>
+      <button type="button" class="btn btn-ghost" onclick="toggleEventManage()">Manage events</button>
+    </div>
+    <div id="eventManageList" class="manage-list" hidden></div>
+  </section>
+
+  <section>
+    <div class="sec-label">Vessel</div>
+    <div class="fg">
+      <label for="vesselPreset">Boat</label>
+      <select id="vesselPreset" class="fc" onchange="onVesselPresetChange()"></select>
+    </div>
+    <div class="fg">
+      <label for="vesselName">Boat name</label>
+      <input id="vesselName" class="fc" type="text" value="" placeholder="Boat name">
+    </div>
+    <div class="manage-row">
+      <button type="button" id="saveVesselBtn" class="btn btn-ghost" onclick="saveCustomVessel()">Save boat</button>
+      <button type="button" class="btn btn-ghost" onclick="toggleVesselManage()">Manage boats</button>
+    </div>
+    <div id="vesselManageList" class="manage-list" hidden></div>
+  </section>
+
+  <section>
+    <div class="sec-label">Location</div>
+    <div class="fg map-wrap">
+      <label for="placeSearch">Search · click map to place pin</label>
+      <input id="placeSearch" class="fc" type="search" placeholder="e.g. Sorrento, Gulf of Naples"
+        autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();searchPlace();}">
+      <div id="searchResults" class="search-results"></div>
+    </div>
+    <div id="venueMap"></div>
+    <p class="map-hint">Click open water or drag the pin. Coordinates show below the map.</p>
+    <div class="coord-readout" id="coordReadout">40.626°N · 14.376°E</div>
+    <div class="nudge-row">
+      <span style="font-size:10px;color:var(--muted);align-self:center;margin-right:var(--s1)">Nudge</span>
+      <button type="button" class="nudge-btn" onclick="nudgePosition(0,1)">1 nm N</button>
+      <button type="button" class="nudge-btn" onclick="nudgePosition(90,1)">1 nm E</button>
+      <button type="button" class="nudge-btn" onclick="nudgePosition(180,1)">1 nm S</button>
+      <button type="button" class="nudge-btn" onclick="nudgePosition(270,1)">1 nm W</button>
+      <button type="button" class="nudge-btn" onclick="nudgePosition(180,3)">3 nm S</button>
+      <button type="button" class="nudge-btn" onclick="nudgePosition(180,5)">5 nm S</button>
+    </div>
+    <div class="fg" style="margin-top:var(--s3)">
+      <label for="venuePreset">Location</label>
+      <select id="venuePreset" class="fc" onchange="onVenuePresetChange()"></select>
+    </div>
+    <div class="fg">
+      <label for="venueInput">Location name</label>
+      <input id="venueInput" class="fc" type="text" value="" placeholder="e.g. Sorrento Race Area">
+    </div>
+    <input id="latInput" type="hidden" value="40.626">
+    <input id="lonInput" type="hidden" value="14.376">
+    <div class="manage-row">
+      <button type="button" id="saveVenueBtn" class="btn btn-ghost" onclick="saveCustomVenue()">Save location</button>
+      <button type="button" class="btn btn-ghost" onclick="toggleVenueManage()">Manage locations</button>
+    </div>
+    <div id="venueManageList" class="manage-list" hidden></div>
+  </section>
+  <section>
+    <div class="sec-label">Forecast</div>
+    <div class="fg">
+      <label for="forecastSource">Source</label>
+      <select id="forecastSource" class="fc" onchange="handleSourceChange()">
+        <option value="grib" selected>Squid GRIB folder (race source)</option>
+        <option value="openmeteo">Open-Meteo quick forecast</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label for="fDate">Race date</label>
+      <input id="fDate" class="fc" type="date">
+    </div>
+    <div class="fg">
+      <label for="briefingModel">Open-Meteo model</label>
+      <select id="briefingModel" class="fc"></select>
+      <p class="map-hint" style="margin-top:var(--s1)">European model pack. Caribbean regional models can be added later.</p>
+    </div>
+    <div class="fg">
+      <label for="fNote">Header note (optional)</label>
+      <input id="fNote" class="fc" type="text" placeholder="e.g. Practice race · Course area W">
+    </div>
+    <div class="fg">
+      <label for="fFooter">Footer (optional)</label>
+      <input id="fFooter" class="fc" type="text" placeholder="Issued by navigation">
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-label">Periods</div>
+    <div id="periodList" class="period-list"></div>
+  </section>
+
+  <section>
+    <div class="sec-label">Squid GRIB</div>
+    <p class="map-hint" style="margin-bottom:var(--s2)">Drop Squid X model downloads into <strong>Squid Gribs/</strong>. The comparison tab treats the folder as a GRIB bundle.</p>
+    <div class="fg">
+      <label for="squidGribSelect">GRIB file</label>
+      <select id="squidGribSelect" class="fc" onchange="handleSquidSelectionChange()">
+        <option value="">Best usable for pin (auto)</option>
+      </select>
+    </div>
+    <p class="map-hint" id="squidGribHint" style="margin-bottom:var(--s3)">Start via <strong>Start Weather Brief.command</strong> on your Mac.</p>
+    <button type="button" id="squidGribBtn" class="btn btn-squid" onclick="loadSquidGrib()">Load Squid GRIB</button>
+  </section>
+
+  <section>
+    <button id="fetchBtn" type="button" class="btn btn-primary" style="width:100%" onclick="fetchSelectedSource()">Load GRIB period brief</button>
+    <button id="supplementOmBtn" type="button" class="btn btn-ghost" style="width:100%;font-size:var(--xs);margin-top:var(--s2);display:none" onclick="supplementForecastFromOpenMeteo()">Supplement CAPE/rain (Open-Meteo ECMWF)</button>
+    <button id="teamCopyBtn" type="button" class="btn btn-ghost" style="width:100%;font-size:var(--xs);margin-top:var(--s2)" onclick="copyTeamBrief()">Copy team brief</button>
+    <button id="teamExportBtn" type="button" class="btn btn-ghost" style="width:100%;font-size:var(--xs);margin-top:var(--s2)" onclick="exportTeamVisualBrief()">Export visual brief</button>
+    <div class="fg" style="margin-top:var(--s3);margin-bottom:0">
+      <label>Team visual preview</label>
+      <div id="teamBriefVisual" class="team-brief-visual">
+        <div class="empty" style="padding:var(--s4)">Load a forecast to generate team brief.</div>
+      </div>
+      <p class="team-visual-hint">Screenshot this visual for WhatsApp/email, or edit/copy the text below as a caption.</p>
+    </div>
+    <div class="fg" style="margin-top:var(--s3);margin-bottom:0">
+      <label for="teamBriefText">Team text caption</label>
+      <textarea id="teamBriefText" class="fc team-copy-box" spellcheck="true" placeholder="Load a forecast to generate WhatsApp/email copy."></textarea>
+    </div>
+    <div class="status-row" style="margin-top:var(--s3)">
+      <span id="statusDot" class="dot"></span>
+      <span id="statusMsg">Ready</span>
+    </div>
+  </section>
+</aside>
+<div class="sidebar-resizer" id="sidebarResizer" title="Drag to resize"></div>
+</div>
+
+<main>
+  <div class="toolbar no-print">
+    <h2>Period brief</h2>
+    <div class="tab-bar">
+      <button type="button" class="tab-btn active" id="briefTabBtn" onclick="switchMainTab('brief')">Briefing</button>
+      <button type="button" class="tab-btn" id="compareTabBtn" onclick="switchMainTab('compare')">Model comparison</button>
+    </div>
+    <span id="lastUpdated" style="font-size:var(--xs);color:var(--muted)"></span>
+  </div>
+  <div class="preview-area">
+    <div id="forecastDoc" class="forecast-doc">
+      <div class="empty">Set venue and date, select periods, then fetch.</div>
+    </div>
+    <div id="comparePanel" class="compare-panel">
+      <div class="compare-head">
+        <div>
+          <div class="compare-title">Model Comparison</div>
+          <div class="compare-sub" id="compareStatus">Fetch GRIB bundle comparison for current location/date.</div>
+        </div>
+        <div class="compare-actions">
+          <div class="fg compare-source">
+            <label for="compareSource">Source</label>
+            <select id="compareSource" class="fc" onchange="handleComparisonSourceChange()">
+              <option value="grib" selected>GRIB bundle</option>
+              <option value="openmeteo">Open-Meteo</option>
+            </select>
+          </div>
+          <button id="compareFetchBtn" type="button" class="btn btn-primary" onclick="fetchModelComparison()">Fetch GRIB bundle</button>
+        </div>
+      </div>
+      <div id="compareSkipped" class="compare-skipped"></div>
+      <div id="compareHourRow" class="compare-hour-row"></div>
+      <div id="compareGrid" class="compare-grid">
+        <div class="empty">No model comparison loaded.</div>
+      </div>
+      <div id="compareChartWrap" class="compare-chart-wrap">
+        <div class="compare-chart-title">TWS by Model</div>
+        <canvas id="compareChartTws" height="280"></canvas>
+        <div class="compare-chart-title">Gusts by Model</div>
+        <canvas id="compareChartGust" height="280"></canvas>
+        <div class="compare-chart-title">TWD by Model</div>
+        <canvas id="compareChartTwd" height="220"></canvas>
+        <div id="compareChartLegend" class="compare-chart-legend"></div>
+      </div>
+      <div id="compareAgreement" class="compare-agreement"></div>
+    </div>
+  </div>
+</main>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+const PERIODS = [
+  { id:'dawn',    name:'Dawn',      from:'04:00', to:'07:00' },
+  { id:'early',   name:'Early',     from:'07:00', to:'09:00' },
+  { id:'morning', name:'Morning',   from:'09:00', to:'12:00' },
+  { id:'midday',  name:'Midday',    from:'12:00', to:'15:00' },
+  { id:'aftn',    name:'Afternoon', from:'15:00', to:'18:00' },
+  { id:'evening', name:'Evening',   from:'18:00', to:'21:00' },
+];
+const ACTIVE_DEFAULT = ['early','morning','midday','aftn'];
+const TREND_PERIOD_IDS = ['morning', 'midday', 'aftn'];
+const TREND_WINDOW_LABEL = '09:00–18:00';
+const DIR16 = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+const WMO_SKY = {
+  0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',
+  45:'Foggy',48:'Rime fog',
+  51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',
+  61:'Light rain',63:'Rain',65:'Heavy rain',
+  80:'Showers',81:'Showers',82:'Heavy showers',
+  95:'Thunderstorm',96:'Thunderstorm + hail',99:'Thunderstorm + hail'
+};
+// European Open-Meteo model pack (Caribbean regional models to be added later).
+const OPENMETEO_EUROPE_MODELS = [
+  { id:'best_match', label:'Best match', group:'Auto', provider:'Open-Meteo', resolution:'auto', base:'https://api.open-meteo.com/v1/forecast', param:'', maxDays:16, briefing:true, compare:false },
+  { id:'ecmwf_ifs', label:'ECMWF IFS HRES', group:'ECMWF', provider:'ECMWF', resolution:'9 km', base:'https://api.open-meteo.com/v1/ecmwf', param:'&models=ecmwf_ifs', maxDays:15, note:'CAPE · native 9 km IFS', briefing:true, compare:true, defaultBriefing:true },
+  { id:'ecmwf_ifs025', label:'ECMWF IFS open-data', group:'ECMWF', provider:'ECMWF', resolution:'25 km', base:'https://api.open-meteo.com/v1/ecmwf', param:'&models=ecmwf_ifs025', maxDays:15, briefing:true, compare:true },
+  { id:'ecmwf_aifs025', label:'ECMWF AIFS', group:'ECMWF', provider:'ECMWF AI', resolution:'28 km', base:'https://api.open-meteo.com/v1/forecast', param:'&models=ecmwf_aifs025', maxDays:15, note:'AI model · 6-hourly native', briefing:true, compare:true },
+  { id:'icon_seamless', label:'ICON Seamless', group:'DWD ICON', provider:'DWD', resolution:'2–11 km', base:'https://api.open-meteo.com/v1/forecast', param:'&models=icon_seamless', maxDays:7, briefing:true, compare:true },
+  { id:'icon_global', label:'ICON Global', group:'DWD ICON', provider:'DWD', resolution:'11 km', base:'https://api.open-meteo.com/v1/forecast', param:'&models=icon_global', maxDays:7, briefing:true, compare:true },
+  { id:'icon_eu', label:'ICON-EU', group:'DWD ICON', provider:'DWD', resolution:'7 km', base:'https://api.open-meteo.com/v1/forecast', param:'&models=icon_eu', maxDays:5, briefing:true, compare:true },
+  { id:'icon_d2', label:'ICON-D2', group:'DWD ICON', provider:'DWD', resolution:'2 km', base:'https://api.open-meteo.com/v1/forecast', param:'&models=icon_d2', maxDays:2, domainMsg:'ICON-D2 covers central Europe only. This position may be outside the model domain.', briefing:true, compare:true },
+  { id:'meteofrance_seamless', label:'MF Seamless', group:'Météo-France', provider:'Météo-France', resolution:'1.5–25 km', base:'https://api.open-meteo.com/v1/meteofrance', param:'&models=meteofrance_seamless', maxDays:4, briefing:true, compare:true },
+  { id:'meteofrance_arpege_europe', label:'ARPEGE Europe', group:'Météo-France', provider:'Météo-France', resolution:'11 km', base:'https://api.open-meteo.com/v1/meteofrance', param:'&models=meteofrance_arpege_europe', maxDays:4, domainMsg:'ARPEGE Europe: no data at this position.', briefing:true, compare:true },
+  { id:'meteofrance_arome_france', label:'AROME France', group:'Météo-France', provider:'Météo-France', resolution:'2.5 km', base:'https://api.open-meteo.com/v1/meteofrance', param:'&models=meteofrance_arome_france', maxDays:2, domainMsg:'AROME France covers France and nearby areas only.', briefing:true, compare:true },
+  { id:'meteofrance_arome_france_hd', label:'AROME HD', group:'Météo-France', provider:'Météo-France', resolution:'1.5 km', base:'https://api.open-meteo.com/v1/meteofrance', param:'&models=meteofrance_arome_france_hd', maxDays:2, domainMsg:'AROME HD covers France only. This position is outside the model domain.', briefing:true, compare:true },
+  { id:'italia_meteo_arpae_icon_2i', label:'ICON-2i', group:'Italy', provider:'ItaliaMeteo ARPAE', resolution:'2 km', base:'https://api.open-meteo.com/v1/forecast', param:'&models=italia_meteo_arpae_icon_2i', maxDays:3, domainMsg:'ICON-2i covers Italy and nearby areas. This position may be outside the model domain.', briefing:true, compare:true },
+  { id:'ukmo_seamless', label:'UKMO Seamless', group:'UK Met Office', provider:'UKMO', resolution:'2–10 km', base:'https://api.open-meteo.com/v1/forecast', param:'&models=ukmo_seamless', maxDays:7, briefing:true, compare:true },
+  { id:'ukmo_global_deterministic_10km', label:'UKMO Global 10 km', group:'UK Met Office', provider:'UKMO', resolution:'10 km', base:'https://api.open-meteo.com/v1/forecast', param:'&models=ukmo_global_deterministic_10km', maxDays:7, briefing:true, compare:true },
+  { id:'metno_nordic_seamless', label:'MET Nordic', group:'Nordics', provider:'MET Norway', resolution:'1 km', base:'https://api.open-meteo.com/v1/forecast', param:'&models=metno_nordic_seamless', maxDays:2, domainMsg:'MET Nordic has a short forecast range (~2.5 days).', briefing:true, compare:true },
+  { id:'knmi_harmonie_arome_europe', label:'KNMI Harmonie', group:'Nordics', provider:'KNMI', resolution:'2 km', base:'https://api.open-meteo.com/v1/forecast', param:'&models=knmi_harmonie_arome_europe', maxDays:2, briefing:true, compare:true },
+  { id:'dmi_harmonie_arome_europe', label:'DMI Harmonie', group:'Nordics', provider:'DMI', resolution:'2 km', base:'https://api.open-meteo.com/v1/forecast', param:'&models=dmi_harmonie_arome_europe', maxDays:2, briefing:true, compare:true },
+  { id:'meteoswiss_icon_ch1', label:'MeteoSwiss ICON CH1', group:'Switzerland', provider:'MeteoSwiss', resolution:'1 km', base:'https://api.open-meteo.com/v1/forecast', param:'&models=meteoswiss_icon_ch1', maxDays:5, domainMsg:'MeteoSwiss ICON CH covers Switzerland and nearby Alps.', briefing:true, compare:true },
+  { id:'meteoswiss_icon_ch2', label:'MeteoSwiss ICON CH2', group:'Switzerland', provider:'MeteoSwiss', resolution:'2 km', base:'https://api.open-meteo.com/v1/forecast', param:'&models=meteoswiss_icon_ch2', maxDays:5, domainMsg:'MeteoSwiss ICON CH covers Switzerland and nearby Alps.', briefing:true, compare:true },
+  { id:'gfs_seamless', label:'GFS Seamless', group:'Global', provider:'NOAA', resolution:'3–25 km', base:'https://api.open-meteo.com/v1/forecast', param:'&models=gfs_seamless', maxDays:16, briefing:true, compare:true },
+];
+const OPENMETEO_MODEL_ALIASES = {
+  best:'best_match', ecmwf:'ecmwf_ifs', icon:'icon_eu', gfs:'gfs_seamless',
+  arpege:'meteofrance_arpege_europe', arome_hd:'meteofrance_arome_france_hd', icon_2i:'italia_meteo_arpae_icon_2i',
+};
+const OPENMETEO_MODEL_BY_ID = Object.fromEntries(OPENMETEO_EUROPE_MODELS.map(m => [m.id, m]));
+function resolveOpenMeteoModelId(id){ return OPENMETEO_MODEL_ALIASES[id] || id; }
+function getOpenMeteoModel(id){ return OPENMETEO_MODEL_BY_ID[resolveOpenMeteoModelId(id)] || null; }
+function openMeteoModelLabel(id){
+  const m = getOpenMeteoModel(id);
+  return m ? `${m.label} · ${m.resolution}` : 'Open-Meteo';
+}
+
+const OPENMETEO_META_BASE = 'https://openmeteo.s3.amazonaws.com/data';
+const HYBRID_OM_MODEL_ID = 'ecmwf_ifs';
+
+function openMeteoMetadataSlug(cfg){
+  if(cfg?.metadataSlug) return cfg.metadataSlug;
+  const m = String(cfg?.param || '').match(/models=([^&]+)/);
+  if(m) return decodeURIComponent(m[1]);
+  if(cfg?.base?.includes('/ecmwf')) return cfg.id && cfg.id.startsWith('ecmwf') ? cfg.id : HYBRID_OM_MODEL_ID;
+  return cfg?.id || '';
+}
+
+async function fetchOpenMeteoRunMeta(slug){
+  if(!slug) return null;
+  try {
+    const res = await fetch(`${OPENMETEO_META_BASE}/${slug}/static/meta.json`);
+    if(!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+}
+
+function formatUnixUtcRun(unix){
+  if(unix == null || isNaN(unix)) return '';
+  const d = new Date(Number(unix) * 1000);
+  const y = d.getUTCFullYear();
+  const mo = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const da = String(d.getUTCDate()).padStart(2, '0');
+  const hh = String(d.getUTCHours()).padStart(2, '0');
+  return `${y}-${mo}-${da} ${hh}:00z`;
+}
+
+function seriesHasValues(arr){
+  return Array.isArray(arr) && arr.some(v => v != null && !isNaN(v));
+}
+
+function buildBriefSourceNote(){
+  if(!forecastData) return '';
+  if(forecastMeta?.source === 'Squid GRIB'){
+    const gribLabel = gribSourceLabel || 'Squid GRIB';
+    const parts = [`Wind: ${gribLabel}`];
+    const fs = forecastMeta.fieldSources || {};
+    if(fs.cape) parts.push(`CAPE: ${fs.cape}`);
+    if(fs.rain) parts.push(`Rain: ${fs.rain}`);
+    if(fs.uv) parts.push(`UV: ${fs.uv}`);
+    if(fs.wave) parts.push(`Sig Wave: ${fs.wave}`);
+    if(fs.temp) parts.push(`Temp: ${fs.temp}`);
+    if(fs.sky) parts.push(`Sky: ${fs.sky}`);
+    return parts.join(' · ');
+  }
+  return `Open-Meteo · ${openMeteoModelLabel(forecastMeta?.model || document.getElementById('briefingModel')?.value)}`;
+}
+
+function fieldSourceTag(key){
+  const src = forecastMeta?.fieldSources?.[key];
+  return src ? `<span class="field-source">(${escapeHtml(src)})</span>` : '';
+}
+
+function updateSupplementButtonVisibility(){
+  const btn = document.getElementById('supplementOmBtn');
+  if(!btn) return;
+  const source = document.getElementById('forecastSource')?.value || 'grib';
+  btn.style.display = source === 'grib' && forecastData ? 'block' : 'none';
+}
+
+function gribNeedsOpenMeteoSupplement(){
+  if(!forecastData || forecastMeta?.source !== 'Squid GRIB') return false;
+  return !seriesHasValues(forecastData.cape)
+    || !seriesHasValues(forecastData.rain)
+    || !seriesHasValues(forecastData.uv);
+}
+
+async function fetchOpenMeteoEcmwfSupplement(lat, lon, targetDate){
+  const dateParam = `&start_date=${targetDate}&end_date=${targetDate}`;
+  const url = 'https://api.open-meteo.com/v1/ecmwf'
+    + `?latitude=${lat}&longitude=${lon}`
+    + '&hourly=temperature_2m,weathercode,cape,uv_index,precipitation'
+    + '&timezone=Europe%2FRome&wind_speed_unit=kn'
+    + `&models=${HYBRID_OM_MODEL_ID}${dateParam}`;
+  const [res, metaJson] = await Promise.all([
+    fetch(url),
+    fetchOpenMeteoRunMeta(HYBRID_OM_MODEL_ID),
+  ]);
+  if(!res.ok) throw new Error(`Open-Meteo ECMWF supplement HTTP ${res.status}`);
+  const data = await res.json();
+  if(data.error) throw new Error(data.reason || 'Open-Meteo ECMWF supplement error');
+  const hours = (data.hourly?.time || []).map(t => parseInt(t.split('T')[1], 10));
+  return {
+    hours,
+    cape: data.hourly?.cape || [],
+    rain: data.hourly?.precipitation || [],
+    uv: data.hourly?.uv_index || [],
+    temp: data.hourly?.temperature_2m || [],
+    wmo: data.hourly?.weathercode || [],
+    run: formatUnixUtcRun(metaJson?.last_run_initialisation_time),
+    apiLive: formatUnixUtcRun(metaJson?.last_run_availability_time),
+  };
+}
+
+function alignSupplementToForecast(supplement){
+  const hourMap = new Map();
+  supplement.hours.forEach((h, i) => hourMap.set(h, i));
+  const pick = key => forecastData.hours.map(h => {
+    const idx = hourMap.get(h);
+    return idx == null ? null : (supplement[key]?.[idx] ?? null);
+  });
+  return {
+    cape: pick('cape'),
+    rain: pick('rain'),
+    uv: pick('uv'),
+    temp: pick('temp'),
+    wmo: pick('wmo'),
+  };
+}
+
+async function supplementForecastFromOpenMeteo(options = {}){
+  const { silent = false, auto = false } = options;
+  if(!gribNeedsOpenMeteoSupplement()){
+    if(!silent) setStatus('yellow', 'GRIB already has CAPE/rain/UV or no GRIB brief loaded.');
+    return false;
+  }
+  const lat = parseFloat(document.getElementById('latInput').value);
+  const lon = parseFloat(document.getElementById('lonInput').value);
+  if(isNaN(lat) || isNaN(lon)){
+    if(!silent) setStatus('red', 'Set location before Open-Meteo supplement.');
+    return false;
+  }
+  const targetDate = document.getElementById('fDate').value || new Date().toISOString().split('T')[0];
+  if(!silent) setStatus('yellow', 'Fetching Open-Meteo ECMWF supplement…');
+  try {
+    const supplement = await fetchOpenMeteoEcmwfSupplement(lat, lon, targetDate);
+    const aligned = alignSupplementToForecast(supplement);
+    const label = 'Open-Meteo ECMWF';
+    forecastMeta.fieldSources = forecastMeta.fieldSources || {};
+    let merged = 0;
+    if(!seriesHasValues(forecastData.cape) && seriesHasValues(aligned.cape)){
+      forecastData.cape = aligned.cape;
+      forecastMeta.fieldSources.cape = label;
+      merged++;
+    }
+    if(!seriesHasValues(forecastData.rain) && seriesHasValues(aligned.rain)){
+      forecastData.rain = aligned.rain;
+      forecastMeta.fieldSources.rain = label;
+      forecastMeta.rainMode = forecastMeta.rainMode || 'accum';
+      merged++;
+    }
+    if(!seriesHasValues(forecastData.uv) && seriesHasValues(aligned.uv)){
+      forecastData.uv = aligned.uv;
+      forecastMeta.fieldSources.uv = label;
+      merged++;
+    }
+    if(!seriesHasValues(forecastData.temp) && seriesHasValues(aligned.temp)){
+      forecastData.temp = aligned.temp;
+      forecastMeta.fieldSources.temp = label;
+      merged++;
+    }
+    if(!seriesHasValues(forecastData.wmo) && seriesHasValues(aligned.wmo)){
+      forecastData.wmo = aligned.wmo;
+      forecastMeta.fieldSources.sky = label;
+      merged++;
+    }
+    forecastMeta.omSupplementRun = supplement.run || '';
+    forecastMeta.omSupplementLive = supplement.apiLive || '';
+    if(!merged){
+      if(!silent) setStatus('yellow', 'Open-Meteo ECMWF had no usable supplement fields for this date.');
+      return false;
+    }
+    const stamp = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    const msg = auto
+      ? `GRIB brief loaded · supplemented ${merged} field(s) from Open-Meteo ECMWF`
+      : `Supplemented ${merged} field(s) from Open-Meteo ECMWF · ${stamp}`;
+    setStatus('green', msg);
+    renderBrief();
+    updateSupplementButtonVisibility();
+    return true;
+  } catch(e){
+    if(!silent) setStatus('red', `Open-Meteo supplement failed: ${e.message}`);
+    return false;
+  }
+}
+function isMeteoFranceOpenMeteoModel(id){
+  const m = getOpenMeteoModel(id);
+  return !!(m && m.base.includes('meteofrance'));
+}
+function populateBriefingModelSelect(){
+  const sel = document.getElementById('briefingModel');
+  if(!sel) return;
+  const current = resolveOpenMeteoModelId(sel.value || 'ecmwf_ifs');
+  sel.innerHTML = '';
+  const groups = {};
+  OPENMETEO_EUROPE_MODELS.filter(m => m.briefing !== false).forEach(m => {
+    if(!groups[m.group]) groups[m.group] = [];
+    groups[m.group].push(m);
+  });
+  Object.keys(groups).forEach(groupName => {
+    const og = document.createElement('optgroup');
+    og.label = groupName;
+    groups[groupName].forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.id;
+      opt.textContent = `${m.label} · ${m.resolution}`;
+      if(m.note) opt.title = m.note;
+      if(m.defaultBriefing) opt.selected = true;
+      og.appendChild(opt);
+    });
+    sel.appendChild(og);
+  });
+  if(OPENMETEO_MODEL_BY_ID[current]){
+    sel.value = current;
+  }
+}
+function assertOpenMeteoDateLimit(modelCfg, targetDate){
+  if(!modelCfg?.maxDays) return;
+  const limit = new Date();
+  limit.setHours(12, 0, 0, 0);
+  limit.setDate(limit.getDate() + Math.floor(modelCfg.maxDays));
+  if(new Date(targetDate + 'T12:00:00') > limit){
+    throw new Error(`${modelCfg.label} has a ${modelCfg.maxDays}-day forecast limit. Choose an earlier date.`);
+  }
+}
+const COMPARE_GRIB_MAX_HOURS = 96;
+const COMPARE_DAY_LABELS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+let activePeriods = new Set(ACTIVE_DEFAULT);
+let forecastData = null;
+let comparisonData = {};
+let comparisonSkippedGribs = [];
+let comparisonSelectedHour = null;
+let comparisonTimelineBaseDate = null;
+let comparisonChartResizeObserver = null;
+let gribSourceLabel = null;
+let forecastMeta = null;
+const SAVED_PINS_KEY = 'layla-saved-pins';
+const SAVED_VENUES_KEY = 'lift-saved-venues';
+const SAVED_VESSELS_KEY = 'lift-saved-vessels';
+const SAVED_EVENTS_KEY = 'lift-saved-events';
+const STORAGE_VERSION_KEY = 'lift-storage-version';
+const STORAGE_VERSION = '4';
+const SIDEBAR_WIDTH_KEY = 'lift-sidebar-width';
+const SIDEBAR_MIN = 320;
+const SIDEBAR_MAX = 640;
+const SIDEBAR_DEFAULT = 440;
+const BUILTIN_VENUES = [];
+const BUILTIN_VESSELS = [];
+const BUILTIN_EVENTS = [];
+let venueMap = null;
+let venueMarker = null;
+let editingVenueId = null;
+let editingVesselId = null;
+let editingEventId = null;
+let venueManageOpen = false;
+let vesselManageOpen = false;
+let eventManageOpen = false;
+
+function initVenueMap(){
+  const lat = parseFloat(document.getElementById('latInput').value) || 40.626;
+  const lon = parseFloat(document.getElementById('lonInput').value) || 14.376;
+  venueMap = L.map('venueMap', { zoomControl: true }).setView([lat, lon], 11);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+    attribution: '&copy; OpenStreetMap'
+  }).addTo(venueMap);
+  L.tileLayer('https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png', {
+    attribution: 'OpenSeaMap'
+  }).addTo(venueMap);
+  venueMarker = L.marker([lat, lon], { draggable: true }).addTo(venueMap);
+  venueMarker.on('dragend', () => {
+    const p = venueMarker.getLatLng();
+    setPosition(p.lat, p.lng, { fromMap: true });
+  });
+  venueMap.on('click', e => setPosition(e.latlng.lat, e.latlng.lng, { fromMap: true }));
+  setTimeout(() => venueMap.invalidateSize(), 150);
+  updateCoordReadout(lat, lon);
+}
+
+function setPosition(lat, lon, opts = {}){
+  lat = Math.round(lat * 1000) / 1000;
+  lon = Math.round(lon * 1000) / 1000;
+  document.getElementById('latInput').value = lat;
+  document.getElementById('lonInput').value = lon;
+  updateCoordReadout(lat, lon);
+  if(venueMarker) venueMarker.setLatLng([lat, lon]);
+  if(venueMap && opts.pan !== false) venueMap.panTo([lat, lon]);
+  if(!opts.skipPresetClear){
+    document.getElementById('venuePreset').value = '';
+    editingVenueId = null;
+    updateSaveVenueBtn();
+  }
+  if(!opts.skipRender) renderBrief();
+}
+
+function updateCoordReadout(lat, lon){
+  const ns = lat >= 0 ? 'N' : 'S';
+  const ew = lon >= 0 ? 'E' : 'W';
+  document.getElementById('coordReadout').textContent =
+    `${Math.abs(lat).toFixed(3)}°${ns} · ${Math.abs(lon).toFixed(3)}°${ew}`;
+}
+
+function nudgePosition(bearingDeg, nm){
+  const lat = parseFloat(document.getElementById('latInput').value);
+  const lon = parseFloat(document.getElementById('lonInput').value);
+  if(isNaN(lat) || isNaN(lon)) return;
+  const br = bearingDeg * Math.PI / 180;
+  const dLat = (nm / 60) * Math.cos(br);
+  const dLon = (nm / 60) * Math.sin(br) / Math.cos(lat * Math.PI / 180);
+  setPosition(lat + dLat, lon + dLon, { fromMap: true });
+}
+
+async function searchPlace(){
+  const q = document.getElementById('placeSearch').value.trim();
+  const resultsEl = document.getElementById('searchResults');
+  if(!q){ resultsEl.style.display = 'none'; return; }
+  resultsEl.style.display = 'block';
+  resultsEl.innerHTML = '<div class="search-result"><span class="sr-sub">Searching…</span></div>';
+  const urls = [
+    `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=6&lang=en`,
+    `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=6`
+  ];
+  for(const url of urls){
+    try {
+      const res = await fetch(url, { headers: { Accept: 'application/json' } });
+      if(!res.ok) continue;
+      const raw = await res.json();
+      let items = [];
+      if(raw.features){
+        items = raw.features.map(f => ({
+          lat: f.geometry.coordinates[1],
+          lon: f.geometry.coordinates[0],
+          name: [f.properties.name, f.properties.city || f.properties.state, f.properties.country].filter(Boolean).join(', '),
+          sub: [f.properties.type, f.properties.country].filter(Boolean).join(' · ')
+        }));
+      } else if(Array.isArray(raw)){
+        items = raw.map(r => ({
+          lat: parseFloat(r.lat),
+          lon: parseFloat(r.lon),
+          name: r.display_name.split(',').slice(0, 2).join(', '),
+          sub: r.display_name.split(',').slice(2, 4).join(', ')
+        }));
+      }
+      if(!items.length){
+        resultsEl.innerHTML = '<div class="search-result"><span class="sr-sub">No results</span></div>';
+        return;
+      }
+      resultsEl.innerHTML = items.map((r, i) =>
+        `<button type="button" class="search-result" data-i="${i}">
+          <div class="sr-name">${escapeHtml(r.name)}</div>
+          <div class="sr-sub">${escapeHtml(r.sub || '')}</div>
+        </button>`
+      ).join('');
+      resultsEl.querySelectorAll('.search-result').forEach((btn, i) => {
+        btn.onclick = () => selectSearchResult(items[i].lat, items[i].lon, items[i].name);
+      });
+      return;
+    } catch(e) { continue; }
+  }
+  resultsEl.innerHTML = '<div class="search-result"><span class="sr-sub">Search failed</span></div>';
+}
+
+function selectSearchResult(lat, lon, name){
+  setPosition(lat, lon, { pan: true });
+  document.getElementById('venueInput').value = name;
+  document.getElementById('placeSearch').value = '';
+  document.getElementById('searchResults').style.display = 'none';
+  if(venueMap) venueMap.setZoom(12);
+  renderBrief();
+}
+
+function venueValue(lat, lon, label){
+  return `${Number(lat).toFixed(3)},${Number(lon).toFixed(3)},${label}`;
+}
+
+function parseVenueValue(val){
+  if(!val) return null;
+  const parts = String(val).split(',');
+  if(parts.length < 3) return null;
+  const lat = parseFloat(parts[0]);
+  const lon = parseFloat(parts[1]);
+  const label = parts.slice(2).join(',');
+  if(isNaN(lat) || isNaN(lon) || !label) return null;
+  return { lat, lon, label, value: val };
+}
+
+function getSavedVenues(){
+  try { return JSON.parse(localStorage.getItem(SAVED_VENUES_KEY) || '[]'); }
+  catch { return []; }
+}
+
+function setSavedVenues(venues){
+  localStorage.setItem(SAVED_VENUES_KEY, JSON.stringify(venues));
+}
+
+function clearAllUserStorage(){
+  localStorage.removeItem(SAVED_VENUES_KEY);
+  localStorage.removeItem(SAVED_VESSELS_KEY);
+  localStorage.removeItem(SAVED_EVENTS_KEY);
+  localStorage.removeItem(SAVED_PINS_KEY);
+}
+
+function ensureStorageVersion(){
+  if(localStorage.getItem(STORAGE_VERSION_KEY) === STORAGE_VERSION) return;
+  clearAllUserStorage();
+  localStorage.setItem(STORAGE_VERSION_KEY, STORAGE_VERSION);
+}
+
+function getSavedEvents(){
+  try { return JSON.parse(localStorage.getItem(SAVED_EVENTS_KEY) || '[]'); }
+  catch { return []; }
+}
+
+function setSavedEvents(events){
+  localStorage.setItem(SAVED_EVENTS_KEY, JSON.stringify(events));
+}
+
+function getSavedVessels(){
+  try { return JSON.parse(localStorage.getItem(SAVED_VESSELS_KEY) || '[]'); }
+  catch { return []; }
+}
+
+function setSavedVessels(vessels){
+  localStorage.setItem(SAVED_VESSELS_KEY, JSON.stringify(vessels));
+}
+
+function refreshVenuePresetSelect(selectedValue){
+  const sel = document.getElementById('venuePreset');
+  if(!sel) return;
+  const saved = getSavedVenues();
+  const current = selectedValue != null ? selectedValue : sel.value;
+  let html = '';
+  if(BUILTIN_VENUES.length){
+    html += '<optgroup label="Built-in">';
+    BUILTIN_VENUES.forEach(v => {
+      html += `<option value="${escapeHtml(v.value)}">${escapeHtml(v.label)}</option>`;
+    });
+    html += '</optgroup>';
+  }
+  if(saved.length){
+    html += '<optgroup label="My locations">';
+    saved.forEach(v => {
+      html += `<option value="${escapeHtml(v.value)}">${escapeHtml(v.label)}</option>`;
+    });
+    html += '</optgroup>';
+  }
+  sel.innerHTML = html;
+  if(current && [...sel.options].some(o => o.value === current)) sel.value = current;
+}
+
+function refreshVesselPresetSelect(selectedId){
+  const sel = document.getElementById('vesselPreset');
+  if(!sel) return;
+  const saved = getSavedVessels();
+  const current = selectedId != null ? selectedId : sel.value;
+  let html = '';
+  BUILTIN_VESSELS.forEach(v => {
+    html += `<option value="${escapeHtml(v.id)}">${escapeHtml(v.label)}</option>`;
+  });
+  if(saved.length){
+    html += '<optgroup label="My boats">';
+    saved.forEach(v => {
+      html += `<option value="${escapeHtml(v.id)}">${escapeHtml(v.label)}</option>`;
+    });
+    html += '</optgroup>';
+  }
+  sel.innerHTML = html;
+  if(current && [...sel.options].some(o => o.value === current)) sel.value = current;
+}
+
+function updateSaveVenueBtn(){
+  const btn = document.getElementById('saveVenueBtn');
+  if(btn) btn.textContent = editingVenueId ? 'Update location' : 'Save location';
+}
+
+function renderVenueManageList(){
+  const el = document.getElementById('venueManageList');
+  if(!el) return;
+  const saved = getSavedVenues();
+  const clear = manageClearBtn('clearAllSavedVenues', 'Clear all saved locations');
+  if(!saved.length){
+    el.innerHTML = '<div class="manage-empty">No saved locations yet. Set a pin and use Save location.</div>' + clear;
+    return;
+  }
+  el.innerHTML = saved.map(v => `<div class="manage-item" data-venue-id="${escapeHtml(v.id)}">
+    <div class="manage-item-main">
+      <div class="manage-item-name">${escapeHtml(v.label)}</div>
+      <div class="manage-item-sub">${formatCoord(v.lat, v.lon)}</div>
+    </div>
+    <div class="manage-item-actions">
+      <button type="button" class="btn btn-ghost" onclick="loadVenueById('${escapeHtml(v.id)}')">Load</button>
+      <button type="button" class="btn btn-ghost" onclick="startEditVenue('${escapeHtml(v.id)}')">Edit</button>
+      <button type="button" class="btn btn-ghost" onclick="deleteVenue('${escapeHtml(v.id)}')">Delete</button>
+    </div>
+  </div>`).join('') + clear;
+}
+
+function renderVesselManageList(){
+  const el = document.getElementById('vesselManageList');
+  if(!el) return;
+  const saved = getSavedVessels();
+  const clear = manageClearBtn('clearAllSavedVessels', 'Clear all saved boats');
+  if(!saved.length){
+    el.innerHTML = '<div class="manage-empty">No saved boats yet. Enter a name and use Save boat.</div>' + clear;
+    return;
+  }
+  el.innerHTML = saved.map(v => `<div class="manage-item" data-vessel-id="${escapeHtml(v.id)}">
+    <div class="manage-item-main">
+      <div class="manage-item-name">${escapeHtml(v.label)}</div>
+    </div>
+    <div class="manage-item-actions">
+      <button type="button" class="btn btn-ghost" onclick="loadVesselById('${escapeHtml(v.id)}')">Load</button>
+      <button type="button" class="btn btn-ghost" onclick="startEditVessel('${escapeHtml(v.id)}')">Edit</button>
+      <button type="button" class="btn btn-ghost" onclick="deleteVessel('${escapeHtml(v.id)}')">Delete</button>
+    </div>
+  </div>`).join('') + clear;
+}
+
+function toggleVenueManage(){
+  venueManageOpen = !venueManageOpen;
+  const el = document.getElementById('venueManageList');
+  if(!el) return;
+  el.hidden = !venueManageOpen;
+  if(venueManageOpen) renderVenueManageList();
+}
+
+function toggleVesselManage(){
+  vesselManageOpen = !vesselManageOpen;
+  const el = document.getElementById('vesselManageList');
+  if(!el) return;
+  el.hidden = !vesselManageOpen;
+  if(vesselManageOpen) renderVesselManageList();
+}
+
+function onVenuePresetChange(){
+  const val = document.getElementById('venuePreset')?.value || '';
+  editingVenueId = null;
+  updateSaveVenueBtn();
+  if(val) loadPreset(val);
+}
+
+function saveCustomVenue(){
+  const label = document.getElementById('venueInput').value.trim();
+  if(!label){ alert('Enter a location name first (e.g. Sorrento Race Area).'); return; }
+  const lat = parseFloat(document.getElementById('latInput').value);
+  const lon = parseFloat(document.getElementById('lonInput').value);
+  if(isNaN(lat) || isNaN(lon)){ alert('Set valid latitude and longitude.'); return; }
+  const value = venueValue(lat, lon, label);
+  let venues = getSavedVenues();
+  if(editingVenueId){
+    const idx = venues.findIndex(v => v.id === editingVenueId);
+    if(idx >= 0){
+      venues[idx] = { ...venues[idx], lat, lon, label, value };
+      setSavedVenues(venues);
+      refreshVenuePresetSelect(value);
+      editingVenueId = null;
+      updateSaveVenueBtn();
+      if(venueManageOpen) renderVenueManageList();
+      setStatus('green', `Updated location: ${label}`);
+      return;
+    }
+    editingVenueId = null;
+    updateSaveVenueBtn();
+  }
+  const duplicate = venues.find(v => v.value === value);
+  if(duplicate){
+    refreshVenuePresetSelect(value);
+    setStatus('yellow', `Location already saved: ${label}`);
+    return;
+  }
+  venues.push({
+    id: 'venue-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+    lat, lon, label, value,
+  });
+  setSavedVenues(venues);
+  refreshVenuePresetSelect(value);
+  if(venueManageOpen) renderVenueManageList();
+  setStatus('green', `Saved location: ${label}`);
+}
+
+function loadVenueById(id){
+  const venue = getSavedVenues().find(v => v.id === id);
+  if(!venue) return;
+  loadPreset(venue.value);
+  editingVenueId = null;
+  updateSaveVenueBtn();
+}
+
+function startEditVenue(id){
+  const venue = getSavedVenues().find(v => v.id === id);
+  if(!venue) return;
+  editingVenueId = venue.id;
+  document.getElementById('venueInput').value = venue.label;
+  document.getElementById('latInput').value = venue.lat;
+  document.getElementById('lonInput').value = venue.lon;
+  refreshVenuePresetSelect(venue.value);
+  setPosition(venue.lat, venue.lon, { skipPresetClear: true, pan: true });
+  updateSaveVenueBtn();
+  setStatus('yellow', `Editing location: ${venue.label}. Change fields and click Update location.`);
+}
+
+function deleteVenue(id){
+  const venue = getSavedVenues().find(v => v.id === id);
+  if(!venue) return;
+  if(!confirm(`Delete venue "${venue.label}"?`)) return;
+  const venues = getSavedVenues().filter(v => v.id !== id);
+  setSavedVenues(venues);
+  if(editingVenueId === id){
+    editingVenueId = null;
+    updateSaveVenueBtn();
+  }
+  const sel = document.getElementById('venuePreset');
+  if(sel?.value === venue.value) sel.value = '';
+  refreshVenuePresetSelect('');
+  if(venueManageOpen) renderVenueManageList();
+  setStatus('green', `Deleted location: ${venue.label}`);
+}
+
+function onVesselPresetChange(){
+  const val = document.getElementById('vesselPreset')?.value || '';
+  editingVesselId = null;
+  updateSaveVesselBtn();
+  applyVesselPreset(val);
+}
+
+function updateSaveVesselBtn(){
+  const btn = document.getElementById('saveVesselBtn');
+  if(btn) btn.textContent = editingVesselId ? 'Update boat' : 'Save boat';
+}
+
+function saveCustomVessel(){
+  const boatName = document.getElementById('vesselName').value.trim();
+  if(!boatName){ alert('Enter a boat name first.'); return; }
+  const label = boatName;
+  let vessels = getSavedVessels();
+  if(editingVesselId){
+    const idx = vessels.findIndex(v => v.id === editingVesselId);
+    if(idx >= 0){
+      vessels[idx] = { ...vessels[idx], label, boatName };
+      setSavedVessels(vessels);
+      refreshVesselPresetSelect(editingVesselId);
+      const editId = editingVesselId;
+      editingVesselId = null;
+      updateSaveVesselBtn();
+      if(vesselManageOpen) renderVesselManageList();
+      setStatus('green', `Updated boat: ${label}`);
+      return;
+    }
+    editingVesselId = null;
+    updateSaveVesselBtn();
+  }
+  const duplicate = vessels.find(v => v.boatName.toLowerCase() === boatName.toLowerCase());
+  if(duplicate){
+    refreshVesselPresetSelect(duplicate.id);
+    document.getElementById('vesselPreset').value = duplicate.id;
+    setStatus('yellow', `Boat already saved: ${duplicate.label}`);
+    return;
+  }
+  const id = 'vessel-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
+  vessels.push({ id, label, boatName });
+  setSavedVessels(vessels);
+  refreshVesselPresetSelect(id);
+  if(vesselManageOpen) renderVesselManageList();
+  setStatus('green', `Saved boat: ${label}`);
+}
+
+function loadVesselById(id){
+  const vessel = getSavedVessels().find(v => v.id === id) || BUILTIN_VESSELS.find(v => v.id === id);
+  if(!vessel) return;
+  document.getElementById('vesselPreset').value = vessel.id;
+  document.getElementById('vesselName').value = vessel.boatName;
+  editingVesselId = null;
+  updateSaveVesselBtn();
+  renderBrief();
+}
+
+function startEditVessel(id){
+  const vessel = getSavedVessels().find(v => v.id === id);
+  if(!vessel) return;
+  editingVesselId = vessel.id;
+  document.getElementById('vesselPreset').value = vessel.id;
+  document.getElementById('vesselName').value = vessel.boatName;
+  updateSaveVesselBtn();
+  setStatus('yellow', `Editing boat: ${vessel.label}. Change name and click Update boat.`);
+}
+
+function deleteVessel(id){
+  const vessel = getSavedVessels().find(v => v.id === id);
+  if(!vessel) return;
+  if(!confirm(`Delete boat "${vessel.label}"?`)) return;
+  const vessels = getSavedVessels().filter(v => v.id !== id);
+  setSavedVessels(vessels);
+  if(editingVesselId === id){
+    editingVesselId = null;
+    updateSaveVesselBtn();
+  }
+  const sel = document.getElementById('vesselPreset');
+  if(sel?.value === id) sel.value = '';
+  refreshVesselPresetSelect('');
+  if(vesselManageOpen) renderVesselManageList();
+  setStatus('green', `Deleted boat: ${vessel.label}`);
+}
+
+function manageClearBtn(clearFn, label){
+  return `<div class="manage-clear"><button type="button" class="btn btn-ghost" onclick="${clearFn}()">${escapeHtml(label)}</button></div>`;
+}
+
+function clearAllSavedVenues(){
+  if(getSavedVenues().length && !confirm('Delete all saved locations?')) return;
+  setSavedVenues([]);
+  editingVenueId = null;
+  updateSaveVenueBtn();
+  refreshVenuePresetSelect('');
+  if(venueManageOpen) renderVenueManageList();
+  setStatus('green', 'All saved locations cleared.');
+}
+
+function clearAllSavedVessels(){
+  if(getSavedVessels().length && !confirm('Delete all saved boats?')) return;
+  setSavedVessels([]);
+  editingVesselId = null;
+  updateSaveVesselBtn();
+  refreshVesselPresetSelect('');
+  document.getElementById('vesselPreset').value = '';
+  applyVesselPreset('');
+  if(vesselManageOpen) renderVesselManageList();
+  setStatus('green', 'All saved boats cleared.');
+}
+
+function clearAllSavedEvents(){
+  if(getSavedEvents().length && !confirm('Delete all saved events?')) return;
+  setSavedEvents([]);
+  editingEventId = null;
+  updateSaveEventBtn();
+  refreshEventPresetSelect('');
+  if(eventManageOpen) renderEventManageList();
+  setStatus('green', 'All saved events cleared.');
+}
+
+function refreshEventPresetSelect(selectedId){
+  const sel = document.getElementById('eventPreset');
+  if(!sel) return;
+  const saved = getSavedEvents();
+  const current = selectedId != null ? selectedId : sel.value;
+  let html = '';
+  BUILTIN_EVENTS.forEach(e => {
+    html += `<option value="${escapeHtml(e.id)}">${escapeHtml(e.label)}</option>`;
+  });
+  if(saved.length){
+    html += '<optgroup label="My events">';
+    saved.forEach(e => {
+      html += `<option value="${escapeHtml(e.id)}">${escapeHtml(e.label)}</option>`;
+    });
+    html += '</optgroup>';
+  }
+  sel.innerHTML = html;
+  if(current && [...sel.options].some(o => o.value === current)) sel.value = current;
+}
+
+function updateSaveEventBtn(){
+  const btn = document.getElementById('saveEventBtn');
+  if(btn) btn.textContent = editingEventId ? 'Update event' : 'Save event';
+}
+
+function currentEventSnapshot(){
+  const eventName = document.getElementById('eventName').value.trim();
+  const raceDay = document.getElementById('raceDay').value.trim();
+  const lat = parseFloat(document.getElementById('latInput').value);
+  const lon = parseFloat(document.getElementById('lonInput').value);
+  const venueLabel = document.getElementById('venueInput').value.trim();
+  const vesselId = document.getElementById('vesselPreset')?.value || '';
+  const snapshot = {
+    eventName,
+    raceDay,
+    label: eventName,
+    vesselId: vesselId || '',
+  };
+  if(!isNaN(lat) && !isNaN(lon) && venueLabel){
+    snapshot.lat = lat;
+    snapshot.lon = lon;
+    snapshot.venueLabel = venueLabel;
+    snapshot.venueValue = venueValue(lat, lon, venueLabel);
+  }
+  return snapshot;
+}
+
+function applyEventData(event){
+  if(!event) return;
+  document.getElementById('eventName').value = event.eventName || '';
+  document.getElementById('raceDay').value = event.raceDay || '';
+  if(event.venueValue != null && event.lat != null && event.lon != null){
+    document.getElementById('venueInput').value = event.venueLabel || '';
+    refreshVenuePresetSelect(event.venueValue);
+    document.getElementById('venuePreset').value = event.venueValue;
+    setPosition(event.lat, event.lon, { skipPresetClear: true, pan: true });
+    if(venueMap) venueMap.setZoom(11);
+  }
+  if(event.vesselId){
+    refreshVesselPresetSelect(event.vesselId);
+    document.getElementById('vesselPreset').value = event.vesselId;
+    applyVesselPreset(event.vesselId);
+  }
+  renderBrief();
+}
+
+function onEventPresetChange(){
+  const val = document.getElementById('eventPreset')?.value || '';
+  editingEventId = null;
+  updateSaveEventBtn();
+  if(!val){ renderBrief(); return; }
+  loadEventById(val);
+}
+
+function loadEventById(id){
+  const event = getSavedEvents().find(e => e.id === id) || BUILTIN_EVENTS.find(e => e.id === id);
+  if(!event) return;
+  document.getElementById('eventPreset').value = id;
+  applyEventData(event);
+  editingEventId = null;
+  updateSaveEventBtn();
+}
+
+function saveCustomEvent(){
+  const snapshot = currentEventSnapshot();
+  if(!snapshot.eventName){ alert('Enter an event name first.'); return; }
+  let events = getSavedEvents();
+  if(editingEventId){
+    const idx = events.findIndex(e => e.id === editingEventId);
+    if(idx >= 0){
+      events[idx] = { ...events[idx], ...snapshot };
+      setSavedEvents(events);
+      refreshEventPresetSelect(editingEventId);
+      editingEventId = null;
+      updateSaveEventBtn();
+      if(eventManageOpen) renderEventManageList();
+      setStatus('green', `Updated event: ${snapshot.label}`);
+      return;
+    }
+    editingEventId = null;
+    updateSaveEventBtn();
+  }
+  const duplicate = events.find(e => e.eventName.toLowerCase() === snapshot.eventName.toLowerCase());
+  if(duplicate){
+    refreshEventPresetSelect(duplicate.id);
+    document.getElementById('eventPreset').value = duplicate.id;
+    setStatus('yellow', `Event already saved: ${duplicate.label}`);
+    return;
+  }
+  const id = 'event-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
+  events.push({ id, ...snapshot });
+  setSavedEvents(events);
+  refreshEventPresetSelect(id);
+  if(eventManageOpen) renderEventManageList();
+  setStatus('green', `Saved event: ${snapshot.label}`);
+}
+
+function renderEventManageList(){
+  const el = document.getElementById('eventManageList');
+  if(!el) return;
+  const saved = getSavedEvents();
+  const clear = manageClearBtn('clearAllSavedEvents', 'Clear all saved events');
+  if(!saved.length){
+    el.innerHTML = '<div class="manage-empty">No saved events yet. Fill event fields and use Save event.</div>' + clear;
+    return;
+  }
+  el.innerHTML = saved.map(e => {
+    const sub = [e.raceDay, e.venueLabel].filter(Boolean).join(' · ');
+    return `<div class="manage-item">
+    <div class="manage-item-main">
+      <div class="manage-item-name">${escapeHtml(e.label)}</div>
+      ${sub ? `<div class="manage-item-sub">${escapeHtml(sub)}</div>` : ''}
+    </div>
+    <div class="manage-item-actions">
+      <button type="button" class="btn btn-ghost" onclick="loadEventById('${escapeHtml(e.id)}')">Load</button>
+      <button type="button" class="btn btn-ghost" onclick="startEditEvent('${escapeHtml(e.id)}')">Edit</button>
+      <button type="button" class="btn btn-ghost" onclick="deleteEvent('${escapeHtml(e.id)}')">Delete</button>
+    </div>
+  </div>`;
+  }).join('') + clear;
+}
+
+function toggleEventManage(){
+  eventManageOpen = !eventManageOpen;
+  const el = document.getElementById('eventManageList');
+  if(!el) return;
+  el.hidden = !eventManageOpen;
+  if(eventManageOpen) renderEventManageList();
+}
+
+function startEditEvent(id){
+  const event = getSavedEvents().find(e => e.id === id);
+  if(!event) return;
+  editingEventId = event.id;
+  document.getElementById('eventPreset').value = id;
+  applyEventData(event);
+  updateSaveEventBtn();
+  setStatus('yellow', `Editing event: ${event.label}. Change fields and click Update event.`);
+}
+
+function deleteEvent(id){
+  const event = getSavedEvents().find(e => e.id === id);
+  if(!event) return;
+  if(!confirm(`Delete event "${event.label}"?`)) return;
+  const events = getSavedEvents().filter(e => e.id !== id);
+  setSavedEvents(events);
+  if(editingEventId === id){
+    editingEventId = null;
+    updateSaveEventBtn();
+  }
+  const sel = document.getElementById('eventPreset');
+  if(sel?.value === id) sel.value = '';
+  refreshEventPresetSelect('');
+  if(eventManageOpen) renderEventManageList();
+  setStatus('green', `Deleted event: ${event.label}`);
+}
+
+function setSidebarWidth(px, persist){
+  const width = Math.max(SIDEBAR_MIN, Math.min(SIDEBAR_MAX, Math.round(px)));
+  document.documentElement.style.setProperty('--sidebar-width', width + 'px');
+  if(persist) localStorage.setItem(SIDEBAR_WIDTH_KEY, String(width));
+  if(venueMap) setTimeout(() => venueMap.invalidateSize(), 50);
+}
+
+function initSidebar(){
+  const saved = parseInt(localStorage.getItem(SIDEBAR_WIDTH_KEY) || '', 10);
+  setSidebarWidth(!isNaN(saved) ? saved : SIDEBAR_DEFAULT, false);
+  const resizer = document.getElementById('sidebarResizer');
+  if(!resizer) return;
+  let dragging = false;
+  resizer.addEventListener('mousedown', e => {
+    if(document.body.classList.contains('sidebar-collapsed')) return;
+    dragging = true;
+    resizer.classList.add('dragging');
+    e.preventDefault();
+  });
+  window.addEventListener('mousemove', e => {
+    if(!dragging) return;
+    setSidebarWidth(e.clientX, false);
+  });
+  window.addEventListener('mouseup', () => {
+    if(!dragging) return;
+    dragging = false;
+    resizer.classList.remove('dragging');
+    const width = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width'), 10);
+    if(!isNaN(width)) localStorage.setItem(SIDEBAR_WIDTH_KEY, String(width));
+    if(venueMap) venueMap.invalidateSize();
+  });
+}
+
+function toggleSidebar(){
+  document.body.classList.toggle('sidebar-collapsed');
+  const collapsed = document.body.classList.contains('sidebar-collapsed');
+  const icon = document.getElementById('sidebarToggleIcon');
+  if(icon){
+    icon.innerHTML = collapsed
+      ? '<line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>'
+      : '<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/>';
+  }
+  if(venueMap) setTimeout(() => venueMap.invalidateSize(), 150);
+}
+
+function degToDir(deg){
+  if(deg == null || isNaN(deg)) return '—';
+  return DIR16[Math.round(deg / 22.5) % 16];
+}
+function wmoSky(c){ return WMO_SKY[c] || 'Variable'; }
+function waveDesc(h){
+  if(h == null || isNaN(h)) return 'Calm';
+  if(h < 0.5) return 'Slight';
+  if(h < 1.25) return 'Moderate';
+  if(h < 2.5) return 'Rough';
+  return 'Very rough';
+}
+function validVals(arr, idxs = null){
+  const source = idxs ? idxs.map(i => arr?.[i]) : (arr || []);
+  return source.filter(x => x != null && !isNaN(x));
+}
+function avgValue(arr, idxs = null){
+  const v = validVals(arr, idxs);
+  return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
+}
+function minValue(arr, idxs = null){
+  const v = validVals(arr, idxs);
+  return v.length ? Math.min(...v) : null;
+}
+function maxValue(arr, idxs = null){
+  const v = validVals(arr, idxs);
+  return v.length ? Math.max(...v) : null;
+}
+function windDirMean(arr, idxs = null){
+  const v = validVals(arr, idxs);
+  if(!v.length) return null;
+  const sx = v.reduce((a, d) => a + Math.sin(d * Math.PI / 180), 0) / v.length;
+  const cx = v.reduce((a, d) => a + Math.cos(d * Math.PI / 180), 0) / v.length;
+  return ((Math.atan2(sx, cx) * 180 / Math.PI) + 360) % 360;
+}
+function modeValue(arr, idxs = null){
+  const v = validVals(arr, idxs);
+  if(!v.length) return null;
+  const freq = {};
+  v.forEach(x => { freq[x] = (freq[x] || 0) + 1; });
+  return Object.keys(freq).reduce((a, b) => freq[b] > freq[a] ? b : a);
+}
+function fmtRange(min, max, unit = ''){
+  if(min == null || max == null) return '—';
+  const a = Math.round(min);
+  const b = Math.round(max);
+  return a === b ? `${a}${unit}` : `${a}–${b}${unit}`;
+}
+function fmtFixedRange(min, max, unit = '', digits = 1){
+  if(min == null || max == null) return '—';
+  const a = Number(min).toFixed(digits);
+  const b = Number(max).toFixed(digits);
+  return a === b ? `${a}${unit}` : `${a}–${b}${unit}`;
+}
+function fmtRain(value, mode = ''){
+  if(value == null || isNaN(value)) return '—';
+  const n = Number(value);
+  const text = n < 10 ? n.toFixed(1) : Math.round(n).toString();
+  return `${text} ${mode === 'rate' ? 'mm/h' : 'mm'}`;
+}
+const WIND_SPEED_SCALE = [
+  { kt: 0, h: 196, s: 55, l: 42 },
+  { kt: 6, h: 164, s: 55, l: 36 },
+  { kt: 12, h: 86, s: 48, l: 38 },
+  { kt: 18, h: 44, s: 76, l: 43 },
+  { kt: 24, h: 27, s: 78, l: 47 },
+  { kt: 30, h: 5, s: 62, l: 48 },
+  { kt: 38, h: 326, s: 45, l: 45 },
+  { kt: 48, h: 270, s: 42, l: 43 },
+];
+function windSpeedColor(value){
+  if(value == null || isNaN(value)) return '';
+  const n = Math.max(0, Number(value));
+  const scale = WIND_SPEED_SCALE;
+  if(n <= scale[0].kt) return `hsl(${scale[0].h} ${scale[0].s}% ${scale[0].l}%)`;
+  for(let i = 1; i < scale.length; i++){
+    const prev = scale[i - 1];
+    const next = scale[i];
+    if(n <= next.kt){
+      const t = (n - prev.kt) / (next.kt - prev.kt);
+      const hDelta = ((next.h - prev.h + 540) % 360) - 180;
+      const h = Math.round((prev.h + hDelta * t + 360) % 360);
+      const s = Math.round(prev.s + (next.s - prev.s) * t);
+      const l = Math.round(prev.l + (next.l - prev.l) * t);
+      return `hsl(${h} ${s}% ${l}%)`;
+    }
+  }
+  const last = scale[scale.length - 1];
+  return `hsl(${last.h} ${last.s}% ${last.l}%)`;
+}
+function windSpeedStyle(value){
+  const color = windSpeedColor(value);
+  return color ? ` style="--wind-col:${color}"` : '';
+}
+function windSpeedValueHtml(text, value){
+  return `<span class="wind-speed-val"${windSpeedStyle(value)}>${escapeHtml(text)}</span>`;
+}
+function capeClass(cape){
+  if(cape == null || isNaN(cape)) return 'cape-low';
+  if(cape >= 1000) return 'cape-high';
+  if(cape >= 500) return 'cape-active';
+  if(cape >= 200) return 'cape-watch';
+  return 'cape-low';
+}
+function capeLabel(cape){
+  if(cape == null || isNaN(cape)) return 'Unavailable';
+  if(cape >= 1000) return 'High instability';
+  if(cape >= 500) return 'Active instability';
+  if(cape >= 200) return 'Watch';
+  return 'Low';
+}
+function uvLabel(uv){
+  if(uv == null || isNaN(uv)) return 'Unavailable';
+  if(uv >= 8) return 'Very high';
+  if(uv >= 6) return 'High';
+  if(uv >= 3) return 'Moderate';
+  return 'Low';
+}
+function fmt12(t){
+  const [h, m] = t.split(':');
+  const hr = parseInt(h, 10);
+  const ap = hr >= 12 ? 'pm' : 'am';
+  const h12 = hr % 12 || 12;
+  return m === '00' ? `${h12}${ap}` : `${h12}:${m}${ap}`;
+}
+function fmtDate(iso){
+  const d = new Date(iso + 'T00:00:00');
+  const days = ['Sun','Mon','Tues','Wed','Thurs','Fri','Sat'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+function setStatus(color, msg){
+  document.getElementById('statusDot').className = 'dot ' + color;
+  document.getElementById('statusMsg').textContent = msg;
+}
+
+function formatCoord(lat, lon){
+  if(lat == null || lon == null || isNaN(lat) || isNaN(lon)) return '';
+  const la = Number(lat);
+  const lo = Number(lon);
+  return `${Math.abs(la).toFixed(3)}°${la >= 0 ? 'N' : 'S'} ${Math.abs(lo).toFixed(3)}°${lo >= 0 ? 'E' : 'W'}`;
+}
+
+function formatRunTime(meta){
+  if(!meta?.refDate || !meta?.refTime) return '';
+  const d = String(meta.refDate);
+  const t = String(meta.refTime).padStart(4, '0');
+  if(d.length !== 8) return '';
+  return `${d.slice(0,4)}-${d.slice(4,6)}-${d.slice(6,8)} ${t.slice(0,2)}${t.slice(2)}Z`;
+}
+
+function formatLoadedTime(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  if(isNaN(d)) return '';
+  return d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+}
+
+function formatApiGeneration(ms){
+  if(ms == null || isNaN(Number(ms))) return '';
+  return `${Number(ms).toFixed(1)} ms`;
+}
+
+function compareResolutionText(resolution){
+  if(!resolution) return '';
+  const clean = String(resolution)
+    .replace(/^File resolution\s+/i, '')
+    .replace(/^Resolution\s+/i, '')
+    .trim();
+  if(!clean || clean.toLowerCase() === 'unknown') return '';
+  return clean;
+}
+
+function runScheduleForModel(model){
+  const id = resolveOpenMeteoModelId(model);
+  if(id.includes('ecmwf') || id.includes('ifs') || id.includes('aifs')) return [0, 6, 12, 18];
+  return [0, 6, 12, 18];
+}
+
+function formatDuration(ms){
+  const totalMin = Math.max(0, Math.round(ms / 60000));
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  return `${h}h ${String(m).padStart(2, '0')}m`;
+}
+
+function runBadgeInfo(modelLabel){
+  const now = new Date();
+  if(forecastMeta?.source === 'Squid GRIB'){
+    const run = formatRunTime(forecastMeta);
+    const parts = [];
+    if(forecastMeta.loadedAt) parts.push(`GRIB loaded ${formatLoadedTime(forecastMeta.loadedAt)}`);
+    if(forecastMeta.omSupplementRun) parts.push(`OM supplement ${forecastMeta.omSupplementRun}`);
+    return {
+      primary: run ? `${modelLabel} · run ${run}` : modelLabel,
+      secondary: parts.join(' · ') || `Loaded ${now.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' })}`,
+    };
+  }
+  const model = forecastMeta?.model || document.getElementById('briefingModel')?.value || 'best';
+  const schedule = runScheduleForModel(model);
+  let runHour = null;
+
+  if(forecastMeta?.refTime != null){
+    runHour = Math.floor(parseInt(String(forecastMeta.refTime).padStart(4, '0'), 10) / 100);
+  } else {
+    const utcHour = now.getUTCHours();
+    runHour = schedule.filter(h => h <= utcHour).pop();
+    if(runHour == null) runHour = schedule[schedule.length - 1];
+  }
+
+  return {
+    primary: `${modelLabel} · run ${String(runHour).padStart(2, '0')}:00z`,
+    secondary: `Issued at ${now.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' })}`,
+  };
+}
+
+function setSquidHint(msg){
+  const el = document.getElementById('squidGribHint');
+  if(el) el.textContent = msg;
+}
+
+function describeGrib(grib){
+  const label = grib.modelLabel || 'Squid GRIB';
+  const resolution = grib.fileResolutionLabel ? ` | file ${grib.fileResolutionLabel}` : '';
+  return `${label}${resolution} | ${grib.name} | ${grib.sizeMB} MB`;
+}
+
+function handleSourceChange(){
+  const source = document.getElementById('forecastSource').value;
+  const fetchBtn = document.getElementById('fetchBtn');
+  const squidBtn = document.getElementById('squidGribBtn');
+  const briefingModel = document.getElementById('briefingModel');
+  if(source === 'openmeteo'){
+    fetchBtn.textContent = 'Fetch Open-Meteo forecast';
+    squidBtn.textContent = 'Load Squid GRIB (optional)';
+    if(briefingModel) briefingModel.disabled = false;
+    setStatus('yellow', 'Period brief source: Open-Meteo only.');
+  } else {
+    fetchBtn.textContent = 'Load GRIB period brief';
+    squidBtn.textContent = 'Load Squid GRIB';
+    if(briefingModel) briefingModel.disabled = true;
+    setStatus('yellow', 'Period brief source: Squid GRIB. Use supplement button for CAPE/rain if missing.');
+  }
+  updateSupplementButtonVisibility();
+}
+
+function handleSquidSelectionChange(){
+  const sel = document.getElementById('squidGribSelect');
+  const opt = sel.options[sel.selectedIndex];
+  if(!sel.value){
+    setSquidHint('Auto mode: newest usable GRIB for current pin.');
+  } else {
+    setSquidHint('Selected: ' + (opt?.textContent || sel.value));
+  }
+}
+
+function switchMainTab(tab){
+  const isCompare = tab === 'compare';
+  document.getElementById('forecastDoc').style.display = isCompare ? 'none' : 'flex';
+  document.getElementById('comparePanel').style.display = isCompare ? 'flex' : 'none';
+  document.getElementById('briefTabBtn').classList.toggle('active', !isCompare);
+  document.getElementById('compareTabBtn').classList.toggle('active', isCompare);
+  if(isCompare && !Object.keys(comparisonData).length) renderComparison();
+}
+
+function selectedComparisonSource(){
+  return document.getElementById('compareSource')?.value || 'grib';
+}
+
+function comparisonSourceLabel(source = selectedComparisonSource()){
+  return source === 'openmeteo' ? 'Open-Meteo' : 'GRIB bundle';
+}
+
+function comparisonFetchText(source = selectedComparisonSource()){
+  return source === 'openmeteo' ? 'Fetch Open-Meteo' : 'Fetch GRIB bundle';
+}
+
+function comparisonEmptyMessage(source = selectedComparisonSource()){
+  return `No model comparison loaded. Click ${comparisonFetchText(source)}.`;
+}
+
+function handleComparisonSourceChange(){
+  const source = selectedComparisonSource();
+  const btn = document.getElementById('compareFetchBtn');
+  if(btn) btn.textContent = comparisonFetchText(source);
+  comparisonData = {};
+  comparisonConfigs = source === 'openmeteo' ? COMPARE_MODEL_CONFIGS.filter(cfg => cfg.source !== 'local-grib') : COMPARE_MODEL_CONFIGS;
+  comparisonSkippedGribs = [];
+  comparisonSelectedHour = null;
+  comparisonTimelineBaseDate = null;
+  const status = document.getElementById('compareStatus');
+  if(status) status.textContent = `Fetch ${comparisonSourceLabel(source)} comparison for current location/date.`;
+  renderComparison();
+}
+
+const OPENMETEO_COMPARE_MODELS = OPENMETEO_EUROPE_MODELS
+  .filter(m => m.compare)
+  .map(m => ({
+    id: m.id,
+    label: m.label,
+    detail: m.provider,
+    resolution: m.resolution,
+    base: m.base,
+    param: m.param,
+    source: 'open-meteo',
+    note: m.note,
+  }));
+const COMPARE_MODEL_CONFIGS = [
+  ...OPENMETEO_COMPARE_MODELS,
+  { id:'lamma', label:'LaMMA', detail:'Squid GRIB local', resolution:'1 km', source:'local-grib' },
+];
+let comparisonConfigs = COMPARE_MODEL_CONFIGS;
+
+function isLammaGribMeta(meta){
+  const text = [meta?.modelLabel, meta?.file, meta?.name].filter(Boolean).join(' ').toLowerCase();
+  return text.includes('lamma');
+}
+
+async function openMeteoCompareMeta(cfg, data, loadedAt){
+  const slug = openMeteoMetadataSlug(cfg);
+  const metaJson = await fetchOpenMeteoRunMeta(slug);
+  const run = formatUnixUtcRun(metaJson?.last_run_initialisation_time);
+  const apiLive = formatUnixUtcRun(metaJson?.last_run_availability_time);
+  return {
+    resolution: cfg.resolution,
+    dataResolution: 'Hourly',
+    run,
+    runFallback: run ? '' : 'Run metadata unavailable',
+    omAvailable: apiLive ? `API live ${apiLive}` : '',
+    apiGeneration: formatApiGeneration(data?.generationtime_ms),
+    loadedAt,
+  };
+}
+
+function localLammaComparison(cfg){
+  const meta = forecastMeta || {};
+  const loadedAt = meta.source === 'Squid GRIB' && isLammaGribMeta(meta) ? (meta.loadedAt || '') : '';
+  if(meta.source !== 'Squid GRIB' || !isLammaGribMeta(meta)){
+    return {
+      cfg,
+      error: 'Load a LaMMA Squid GRIB file to compare local 1 km data.',
+      readiness: 'Available via Squid GRIB source when a LaMMA file is loaded.',
+      metadata: { resolution: cfg.resolution, dataResolution: 'Hourly GRIB', run: '', loadedAt },
+    };
+  }
+  if(!forecastData?.hours?.length){
+    return { cfg, error: 'LaMMA GRIB loaded but no hourly data is available.' };
+  }
+  return {
+    cfg,
+    hours: forecastData.hours,
+    tws: forecastData.tws,
+    twd: forecastData.twd,
+    gust: forecastData.gust,
+    temp: forecastData.temp,
+    wmo: forecastData.wmo,
+    cape: forecastData.cape,
+    rain: forecastData.rain,
+    wave: forecastData.wave,
+    waveDir: forecastData.waveDir,
+    metadata: {
+      resolution: meta.fileResolutionLabel ? `File resolution ${meta.fileResolutionLabel}` : `File resolution ${cfg.resolution || 'unknown'}`,
+      dataResolution: 'Hourly GRIB',
+      run: formatRunTime(meta),
+      loadedAt,
+      file: meta.file || '',
+      rainMode: meta.rainMode || '',
+    },
+  };
+}
+
+function compareMetaHtml(model){
+  const meta = model?.metadata || {};
+  const parts = [
+    { value: compareResolutionText(meta.resolution), emphasize: true },
+    meta.run ? { label: 'Run ', value: meta.run, emphasize: true } : (meta.runFallback ? { value: meta.runFallback } : null),
+    meta.omAvailable ? { value: meta.omAvailable } : null,
+    meta.apiGeneration ? { label: 'API gen ', value: meta.apiGeneration } : null,
+    meta.loadedAt ? { label: 'Loaded ', value: formatLoadedTime(meta.loadedAt), emphasize: true } : null,
+  ].filter(p => p?.value);
+  return parts.length ? `<div class="compare-meta">${parts.map(p => `<span>${escapeHtml(p.label || '')}${p.emphasize ? `<strong>${escapeHtml(p.value)}</strong>` : escapeHtml(p.value)}</span>`).join('')}</div>` : '';
+}
+
+function compareModelHeaderHtml(cfg, model){
+  const detail = cfg.detail && !/\bGRIB\b/i.test(cfg.detail) ? `<span class="compare-badge">${escapeHtml(cfg.detail)}</span>` : '';
+  const headerModel = {
+    ...(model || {}),
+    metadata: {
+      ...(model?.metadata || {}),
+      resolution: model?.metadata?.resolution || cfg.resolution || '',
+    },
+  };
+  return `<div class="compare-model-row">
+    <div class="compare-model-main">
+      <div class="compare-model">${escapeHtml(cfg.label)}</div>
+      ${detail}
+      ${compareMetaHtml(headerModel)}
+    </div>
+  </div>`;
+}
+
+function cleanGribLabel(label){
+  return String(label || 'GRIB')
+    .replace(/\s*\(Squid GRIB\)\s*/i, '')
+    .trim() || 'GRIB';
+}
+
+function skippedGribLabel(item){
+  if(item?.modelLabel) return cleanGribLabel(item.modelLabel);
+  const file = String(item?.file || '').toLowerCase();
+  if(file.includes('wam') || file.includes('mfwam')) return 'WAM';
+  if(file.includes('ecmwf') || file.includes('ifs')) return 'ECMWF';
+  if(file.includes('gfs')) return 'GFS';
+  if(file.includes('icon')) return 'ICON';
+  if(file.includes('lamma')) return file.includes('0_01') || file.includes('1km') ? 'LaMMA 1 km' : 'LaMMA';
+  if(file.includes('arome')) return 'AROME';
+  if(file.includes('arpege')) return 'ARPEGE';
+  return 'GRIB';
+}
+
+function skippedGribReason(item){
+  const err = String(item?.error || '').trim();
+  if(/no wind data|windSampleCount/i.test(err)) return 'no usable TWS/TWD at selected location';
+  if(/no usable TWS\/TWD or wave data/i.test(err)) return 'no usable TWS/TWD or wave data at selected location';
+  if(/no usable TWS\/TWD, rain, CAPE, or wave data/i.test(err)) return 'no usable TWS/TWD, rain, CAPE, or wave data at selected location';
+  return err || 'no usable data at selected location';
+}
+
+function groupedSkippedGribs(items){
+  const grouped = new Map();
+  (items || []).forEach(item => {
+    const label = skippedGribLabel(item);
+    const reason = skippedGribReason(item);
+    const key = `${label}::${reason}`;
+    if(!grouped.has(key)){
+      grouped.set(key, { label, reason });
+    }
+  });
+  return Array.from(grouped.values());
+}
+
+function gribCompareId(payload, i){
+  const file = payload?.meta?.file || `bundle-${i + 1}`;
+  const slug = String(file).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return `grib-${i}-${slug || `bundle-${i + 1}`}`;
+}
+
+function gribCompareConfig(payload, i){
+  const meta = payload?.meta || {};
+  const label = cleanGribLabel(meta.modelLabel || 'Squid GRIB');
+  const fields = Array.isArray(meta.availableFields) ? meta.availableFields : [];
+  const hasWind = fields.includes('TWS') || fields.includes('TWD');
+  const hasWave = fields.some(field => String(field).toLowerCase().includes('wave'));
+  return {
+    id: gribCompareId(payload, i),
+    label,
+    detail: hasWave && !hasWind ? 'Wave GRIB' : 'GRIB',
+    resolution: meta.fileResolutionLabel || '',
+  };
+}
+
+function gribBundleWindow(models){
+  let start = null;
+  models.forEach(payload => {
+    (payload?.hours || []).forEach(hour => {
+      const n = Number(hour);
+      if(!isNaN(n)) start = start == null ? n : Math.min(start, n);
+    });
+  });
+  return start == null ? null : { start, end: start + COMPARE_GRIB_MAX_HOURS };
+}
+
+function capGribPayloadToWindow(payload, timeWindow){
+  const hours = payload?.hours || [];
+  let idxs = hours
+    .map((hour, i) => ({ hour: Number(hour), i }))
+    .filter(item => !isNaN(item.hour));
+  if(timeWindow){
+    idxs = idxs.filter(item => item.hour >= timeWindow.start && item.hour < timeWindow.end);
+  }
+  idxs = idxs.sort((a, b) => a.hour - b.hour).slice(0, COMPARE_GRIB_MAX_HOURS).map(item => item.i);
+  if(!idxs.length){
+    idxs = hours.slice(0, COMPARE_GRIB_MAX_HOURS).map((_, i) => i);
+  }
+  const pick = arr => Array.isArray(arr) ? idxs.map(i => arr[i] ?? null) : idxs.map(() => null);
+  return {
+    hours: idxs.map(i => hours[i]),
+    tws: pick(payload?.tws),
+    twd: pick(payload?.twd),
+    gust: pick(payload?.gust),
+    temp: pick(payload?.temp),
+    wmo: pick(payload?.wmo),
+    cape: pick(payload?.cape),
+    rain: pick(payload?.rain),
+    wave: pick(payload?.wave),
+    waveDir: pick(payload?.waveDir),
+  };
+}
+
+function gribBundleComparison(payload, cfg, loadedAt, timeWindow){
+  const meta = payload?.meta || {};
+  const capped = capGribPayloadToWindow(payload, timeWindow);
+  const hours = capped.hours;
+  return {
+    cfg,
+    hours,
+    tws: capped.tws,
+    twd: capped.twd,
+    gust: capped.gust,
+    temp: capped.temp,
+    wmo: capped.wmo,
+    cape: capped.cape,
+    rain: capped.rain,
+    wave: capped.wave,
+    waveDir: capped.waveDir,
+    metadata: {
+      resolution: cfg.resolution,
+      run: formatRunTime(meta),
+      loadedAt,
+      rainMode: meta.rainMode || '',
+    },
+  };
+}
+
+async function readApiJson(res, label){
+  const text = await res.text();
+  let data = null;
+  if(text){
+    try {
+      data = JSON.parse(text);
+    } catch {
+      const type = res.headers.get('content-type') || 'unknown content';
+      const hint = type.includes('text/html')
+        ? 'API route returned HTML. Restart Start Weather Brief.command so weather_brief_server.py serves the GRIB bundle endpoint.'
+        : `API route returned ${type}.`;
+      throw new Error(`${label} returned non-JSON HTTP ${res.status}. ${hint}`);
+    }
+  }
+  if(!res.ok) throw new Error(data?.error || `${label} HTTP ${res.status}`);
+  return data || {};
+}
+
+async function fetchGribBundleComparison(lat, lon, loadedAt, dateVal){
+  if(location.protocol === 'file:'){
+    throw new Error('Open Weather Brief via Start Weather Brief.command to use the GRIB bundle.');
+  }
+  const url = new URL('/api/squid-grib-bundle', window.location.origin);
+  url.searchParams.set('lat', String(lat));
+  url.searchParams.set('lon', String(lon));
+  url.searchParams.set('_', String(Date.now()));
+  const res = await fetch(url.toString(), { headers: { Accept: 'application/json' } });
+  const bundle = await readApiJson(res, 'GRIB bundle endpoint');
+  const models = Array.isArray(bundle.models)
+    ? bundle.models.filter(payload => Array.isArray(payload?.hours) && payload.hours.length)
+    : [];
+  if(!models.length) throw new Error('No usable GRIB bundle data');
+
+  comparisonData = {};
+  comparisonSkippedGribs = groupedSkippedGribs(Array.isArray(bundle.skippedFiles) ? bundle.skippedFiles : []);
+  comparisonTimelineBaseDate = dateVal || null;
+  const timeWindow = gribBundleWindow(models);
+  comparisonConfigs = models.map((payload, i) => {
+    const cfg = gribCompareConfig(payload, i);
+    comparisonData[cfg.id] = gribBundleComparison(payload, cfg, loadedAt, timeWindow);
+    return cfg;
+  });
+
+  const status = document.getElementById('compareStatus');
+  const skippedCount = comparisonSkippedGribs.length;
+  const skipped = skippedCount ? ` · skipped ${skippedCount}` : '';
+  status.textContent = `${models.length} GRIB model(s) loaded${skipped} · first ${COMPARE_GRIB_MAX_HOURS}h · ${formatCoord(lat, lon)} · ${fmtDate(dateVal)}`;
+  setStatus('green', `GRIB bundle loaded: ${models.length} model(s)`);
+  renderComparison();
+}
+
+async function fetchOpenMeteoComparison(lat, lon, dateVal, dateParam, loadedAt){
+  comparisonSkippedGribs = [];
+  comparisonTimelineBaseDate = dateVal || null;
+  const openMeteoConfigs = OPENMETEO_COMPARE_MODELS;
+  comparisonConfigs = openMeteoConfigs;
+  const results = await Promise.allSettled(openMeteoConfigs.map(async cfg => {
+    const url = cfg.base
+      + `?latitude=${lat}&longitude=${lon}`
+      + '&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,weathercode,cape,precipitation'
+      + '&timezone=Europe%2FRome&wind_speed_unit=kn'
+      + cfg.param + dateParam;
+    const res = await fetch(url);
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if(data.error) throw new Error(data.reason || 'API error');
+    return { cfg, data };
+  }));
+
+  comparisonData = {};
+  await Promise.all(results.map(async (result, i) => {
+    const cfg = openMeteoConfigs[i];
+    if(result.status !== 'fulfilled'){
+      comparisonData[cfg.id] = { cfg, error: result.reason?.message || 'No data' };
+      return;
+    }
+    const h = result.value.data.hourly;
+    const metadata = await openMeteoCompareMeta(cfg, result.value.data, loadedAt);
+    comparisonData[cfg.id] = {
+      cfg,
+      hours: h.time.map(t => parseInt(t.split('T')[1], 10)),
+      tws: h.wind_speed_10m,
+      twd: h.wind_direction_10m,
+      gust: h.wind_gusts_10m,
+      temp: h.temperature_2m,
+      wmo: h.weathercode,
+      cape: h.cape,
+      rain: h.precipitation,
+      metadata,
+    };
+  }));
+  const loaded = Object.values(comparisonData).filter(m => !m.error).length;
+  const status = document.getElementById('compareStatus');
+  status.textContent = `${loaded}/${openMeteoConfigs.length} Open-Meteo models loaded · ${formatCoord(lat, lon)} · ${fmtDate(dateVal)}`;
+  setStatus(loaded ? 'green' : 'red', loaded ? 'Open-Meteo comparison loaded.' : 'No comparison models loaded.');
+  renderComparison();
+}
+
+async function fetchModelComparison(){
+  const lat = parseFloat(document.getElementById('latInput').value);
+  const lon = parseFloat(document.getElementById('lonInput').value);
+  if(isNaN(lat) || isNaN(lon)){
+    setStatus('red', 'Set location before model comparison.');
+    return;
+  }
+  const dateVal = document.getElementById('fDate').value || new Date().toISOString().split('T')[0];
+  const dateParam = `&start_date=${dateVal}&end_date=${dateVal}`;
+  const source = selectedComparisonSource();
+  const status = document.getElementById('compareStatus');
+  const sourceLabel = comparisonSourceLabel(source);
+  status.textContent = source === 'openmeteo' ? 'Fetching Open-Meteo comparison...' : 'Extracting GRIB bundle comparison...';
+  document.getElementById('compareGrid').innerHTML = `<div class="empty">Loading ${escapeHtml(sourceLabel)} data...</div>`;
+  document.getElementById('compareHourRow').style.display = 'none';
+  document.getElementById('compareChartWrap').style.display = 'none';
+  document.getElementById('compareAgreement').style.display = 'none';
+  const skippedEl = document.getElementById('compareSkipped');
+  if(skippedEl){
+    skippedEl.style.display = 'none';
+    skippedEl.innerHTML = '';
+  }
+
+  const loadedAt = new Date().toISOString();
+  try {
+    if(source === 'openmeteo'){
+      await fetchOpenMeteoComparison(lat, lon, dateVal, dateParam, loadedAt);
+    } else {
+      await fetchGribBundleComparison(lat, lon, loadedAt, dateVal);
+    }
+  } catch(e){
+    comparisonData = {};
+    comparisonConfigs = source === 'openmeteo' ? COMPARE_MODEL_CONFIGS.filter(cfg => cfg.source !== 'local-grib') : COMPARE_MODEL_CONFIGS;
+    comparisonSkippedGribs = [];
+    comparisonSelectedHour = null;
+    comparisonTimelineBaseDate = null;
+    const hint = source === 'grib' ? ' Select Open-Meteo as the comparison source to fetch remote model data.' : '';
+    status.textContent = `${sourceLabel} comparison failed: ${e.message}`;
+    document.getElementById('compareGrid').innerHTML = `<div class="err">${escapeHtml(sourceLabel)} comparison failed: ${escapeHtml(e.message)}.${escapeHtml(hint)}</div>`;
+    setStatus('red', `${sourceLabel} comparison failed.`);
+  }
+}
+
+function compareSlice(model, fromStr, toStr){
+  if(!model || model.error || !model.hours) return null;
+  const from = parseInt(fromStr.split(':')[0], 10);
+  const to = parseInt(toStr.split(':')[0], 10);
+  const idxs = model.hours.reduce((acc, h, i) => {
+    if(h >= from && h < to) acc.push(i);
+    return acc;
+  }, []);
+  if(!idxs.length) return null;
+  const twd = windDirMean(model.twd, idxs);
+  const rainVals = validVals(model.rain, idxs);
+  return {
+    twd,
+    twdStr: degToDir(twd),
+    twsAvg: avgValue(model.tws, idxs),
+    twsMin: minValue(model.tws, idxs),
+    twsMax: maxValue(model.tws, idxs),
+    gust: maxValue(model.gust, idxs),
+    sky: wmoSky(parseInt(modeValue(model.wmo, idxs), 10)),
+    cape: maxValue(model.cape, idxs),
+    rain: rainVals.length ? (model.metadata?.rainMode === 'rate' ? avgValue(model.rain, idxs) : rainVals.reduce((a, b) => a + b, 0)) : null,
+    wave: avgValue(model.wave, idxs),
+    waveDir: windDirMean(model.waveDir, idxs),
+  };
+}
+
+function comparisonLoadedEntries(){
+  return comparisonConfigs
+    .map(cfg => ({ cfg, model: comparisonData[cfg.id] }))
+    .filter(entry => entry.model && !entry.model.error && Array.isArray(entry.model.hours) && entry.model.hours.length);
+}
+
+function comparisonHours(entries = comparisonLoadedEntries()){
+  const hours = new Set();
+  entries.forEach(({ model }) => {
+    model.hours.forEach(h => {
+      const n = Number(h);
+      if(!isNaN(n)) hours.add(n);
+    });
+  });
+  return Array.from(hours).sort((a, b) => a - b);
+}
+
+function nearestComparisonHour(hour, hours = comparisonHours()){
+  if(!hours.length) return null;
+  if(hour == null || isNaN(hour)) return hours[0];
+  return hours.reduce((best, h) => Math.abs(h - hour) < Math.abs(best - hour) ? h : best, hours[0]);
+}
+
+function comparisonHourLabel(hour){
+  const n = Number(hour);
+  if(isNaN(n)) return '--';
+  const rounded = Math.round(n);
+  if(comparisonTimelineBaseDate){
+    const base = new Date(`${comparisonTimelineBaseDate}T00:00:00`);
+    if(!isNaN(base)){
+      base.setHours(base.getHours() + rounded);
+      return `${COMPARE_DAY_LABELS[base.getDay()]} ${String(base.getHours()).padStart(2, '0')}`;
+    }
+  }
+  if(rounded >= 24) return `D+${Math.floor(rounded / 24)} ${String(rounded % 24).padStart(2, '0')}`;
+  return `${String(rounded).padStart(2, '0')}:00`;
+}
+
+function setComparisonSliderFill(slider){
+  if(!slider) return;
+  const min = Number(slider.min);
+  const max = Number(slider.max);
+  const value = Number(slider.value);
+  const pct = max === min ? 100 : Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100));
+  slider.style.background = `linear-gradient(to right,var(--primary) ${pct}%,var(--border) ${pct}%)`;
+}
+
+function setComparisonHour(rawHour, redraw = true){
+  const hours = comparisonHours();
+  comparisonSelectedHour = nearestComparisonHour(Number(rawHour), hours);
+  const label = document.getElementById('compareHourLabel');
+  if(label) label.textContent = comparisonSelectedHour == null ? '--:--' : comparisonHourLabel(comparisonSelectedHour);
+  const slider = document.getElementById('compareHourSlider');
+  if(slider && comparisonSelectedHour != null){
+    slider.value = comparisonSelectedHour;
+    setComparisonSliderFill(slider);
+  }
+  if(redraw){
+    renderComparisonCards();
+    renderComparisonAgreement();
+    renderComparisonCharts();
+  }
+}
+
+function handleComparisonHourInput(input){
+  const previewHour = nearestComparisonHour(Number(input.value));
+  const label = document.getElementById('compareHourLabel');
+  if(label) label.textContent = previewHour == null ? '--' : comparisonHourLabel(previewHour);
+  setComparisonSliderFill(input);
+}
+
+function commitComparisonHour(rawHour){
+  const scrollX = window.scrollX;
+  const scrollY = window.scrollY;
+  setComparisonHour(rawHour, true);
+  requestAnimationFrame(() => window.scrollTo(scrollX, scrollY));
+}
+
+function handleComparisonHourChange(input){
+  commitComparisonHour(input.value);
+}
+
+function renderComparisonHourControl(){
+  const row = document.getElementById('compareHourRow');
+  if(!row) return;
+  const hours = comparisonHours();
+  if(!hours.length){
+    row.style.display = 'none';
+    row.innerHTML = '';
+    return;
+  }
+  comparisonSelectedHour = nearestComparisonHour(comparisonSelectedHour, hours);
+  const minH = hours[0];
+  const maxH = hours[hours.length - 1];
+  row.innerHTML = `<div class="chr-wrap">
+    <div class="chr-label-wrap">
+      <span class="chr-label" id="compareHourLabel">${comparisonHourLabel(comparisonSelectedHour)}</span>
+      <span class="chr-sublabel">Local time</span>
+    </div>
+    <input type="range" class="chr-slider" id="compareHourSlider" min="${minH}" max="${maxH}" step="1" value="${comparisonSelectedHour}" oninput="handleComparisonHourInput(this)" onchange="handleComparisonHourChange(this)">
+  </div>`;
+  row.style.display = 'flex';
+  setComparisonSliderFill(document.getElementById('compareHourSlider'));
+}
+
+function compareHourData(model, hour = comparisonSelectedHour){
+  if(!model || model.error || !Array.isArray(model.hours) || hour == null) return null;
+  const idx = model.hours.findIndex(h => Number(h) === Number(hour));
+  if(idx < 0) return null;
+  return {
+    tws: validNumber(model.tws?.[idx]),
+    gust: validNumber(model.gust?.[idx]),
+    twd: validNumber(model.twd?.[idx]),
+    temp: validNumber(model.temp?.[idx]),
+    wmo: validNumber(model.wmo?.[idx]),
+    cape: validNumber(model.cape?.[idx]),
+    rain: validNumber(model.rain?.[idx]),
+    wave: validNumber(model.wave?.[idx]),
+    waveDir: validNumber(model.waveDir?.[idx]),
+  };
+}
+
+function validNumber(value){
+  const n = Number(value);
+  return value == null || isNaN(n) ? null : n;
+}
+
+function compareMetricCell(label, value, valueClass = '', cellClass = '', valueStyle = ''){
+  const cellCls = ['compare-data-cell', cellClass].filter(Boolean).join(' ');
+  const valCls = ['compare-data-val', valueClass].filter(Boolean).join(' ');
+  return `<div class="${cellCls}">
+    <div class="${valCls}"${valueStyle}>${escapeHtml(value)}</div>
+    <div class="compare-data-label">${escapeHtml(label)}</div>
+  </div>`;
+}
+
+function compareWaveText(d){
+  if(d.wave == null && d.waveDir == null) return '—';
+  const height = d.wave == null ? '—' : `${Number(d.wave).toFixed(1)} m`;
+  const direction = d.waveDir == null ? '' : ` ${degToDir(d.waveDir)} ${Math.round(d.waveDir)}°`;
+  return `${height}${direction}`;
+}
+
+function renderComparison(){
+  const grid = document.getElementById('compareGrid');
+  if(!grid) return;
+  if(!Object.keys(comparisonData).length){
+    grid.innerHTML = `<div class="empty">${escapeHtml(comparisonEmptyMessage())}</div>`;
+    document.getElementById('compareHourRow').style.display = 'none';
+    document.getElementById('compareChartWrap').style.display = 'none';
+    document.getElementById('compareAgreement').style.display = 'none';
+    renderSkippedGribs();
+    return;
+  }
+  renderComparisonHourControl();
+  renderComparisonCards();
+  renderSkippedGribs();
+  renderComparisonAgreement();
+  renderComparisonCharts();
+  setupComparisonChartResize();
+}
+
+function renderComparisonCards(){
+  const grid = document.getElementById('compareGrid');
+  if(!grid) return;
+  grid.innerHTML = comparisonConfigs.map((cfg, index) => {
+    const model = comparisonData[cfg.id];
+    const modelStyle = ` style="--model-col:${compareModelColor(cfg, index)}"`;
+    if(!model || model.error){
+      return `<article class="compare-card"${modelStyle}>
+        ${compareModelHeaderHtml(cfg, model)}
+        <div class="compare-period-sub">No data: ${escapeHtml(model?.error || 'not loaded')}</div>
+        ${model?.readiness ? `<div class="compare-period-sub">${escapeHtml(model.readiness)}</div>` : ''}
+      </article>`;
+    }
+    const d = compareHourData(model);
+    const cells = d ? [
+      compareMetricCell('TWS', d.tws == null ? '—' : `${Math.round(d.tws)} kt`, 'wind-speed-val', '', windSpeedStyle(d.tws)),
+      compareMetricCell('Gust', d.gust == null ? '—' : `${Math.round(d.gust)} kt`, 'wind-speed-val', '', windSpeedStyle(d.gust)),
+      compareMetricCell('TWD', d.twd == null ? '—' : `${Math.round(d.twd)}°`),
+      d.temp == null ? '' : compareMetricCell('Temp', `${Math.round(d.temp)}°C`),
+      d.wmo == null ? '' : compareMetricCell('Weather', wmoSky(Math.round(d.wmo))),
+      d.cape == null ? '' : compareMetricCell('CAPE', `${Math.round(d.cape)} J/kg`, capeClass(d.cape)),
+      d.rain == null ? '' : compareMetricCell('Rain', fmtRain(d.rain, model.metadata?.rainMode), 'compare-val-rain', 'compare-cell-rain'),
+      d.wave == null && d.waveDir == null ? '' : compareMetricCell('Sig Wave', compareWaveText(d), 'compare-val-wave', 'compare-cell-wave'),
+    ].filter(Boolean).join('') : '';
+    return `<article class="compare-card"${modelStyle}>
+      ${compareModelHeaderHtml(cfg, model)}
+      ${d ? `<div class="compare-data-grid">${cells}</div>` : '<div class="compare-period-sub">No data for selected hour.</div>'}
+    </article>`;
+  }).join('');
+}
+
+function renderSkippedGribs(){
+  const el = document.getElementById('compareSkipped');
+  if(!el) return;
+  if(!comparisonSkippedGribs.length){
+    el.style.display = 'none';
+    el.innerHTML = '';
+    return;
+  }
+  const items = comparisonSkippedGribs.map(item => {
+    const label = escapeHtml(item.label || skippedGribLabel(item));
+    const reason = escapeHtml(item.reason || skippedGribReason(item));
+    return `<div><strong>${label} skipped:</strong> ${reason}</div>`;
+  }).join('');
+  el.innerHTML = `<strong>Skipped GRIBs</strong>${items}`;
+  el.style.display = 'block';
+}
+
+function renderComparisonAgreement(){
+  const wrap = document.getElementById('compareAgreement');
+  if(!wrap) return;
+  const vals = comparisonLoadedEntries()
+    .map(({ model }) => compareHourData(model))
+    .filter(Boolean);
+  if(vals.length < 2){
+    wrap.style.display = 'none';
+    wrap.innerHTML = '';
+    return;
+  }
+  const twsVals = vals.map(v => v.tws).filter(v => v != null);
+  const gustVals = vals.map(v => v.gust).filter(v => v != null);
+  const twdVals = vals.map(v => v.twd).filter(v => v != null);
+  const rows = [
+    agreementRow('TWS', twsVals, 'kt', 2, 4, false),
+    agreementRow('Gusts', gustVals, 'kt', 3, 6, false),
+    agreementRow('TWD', twdVals, '°', 20, 40, true),
+  ].filter(Boolean);
+  wrap.style.display = rows.length ? 'flex' : 'none';
+  wrap.innerHTML = rows.length ? `
+    <div class="agree-title">Model Agreement · ${comparisonHourLabel(comparisonSelectedHour)}</div>
+    ${rows.join('')}
+    <div class="agree-note">Bar length is agreement strength. TWS high agreement is &lt;2 kt spread; TWD high agreement is &lt;20° spread.</div>
+  ` : '';
+}
+
+function agreementRow(label, values, unit, goodSpread, okSpread, circular){
+  if(values.length < 2) return '';
+  const spread = circular ? circularSpread(values) : Math.max(...values) - Math.min(...values);
+  const avg = circular ? windDirMean(values) : values.reduce((a, b) => a + b, 0) / values.length;
+  const cls = spread <= goodSpread ? 'agree-good' : spread <= okSpread ? 'agree-ok' : 'agree-poor';
+  const max = okSpread * 2.5;
+  const pct = Math.max(6, Math.min(100, 100 - (spread / max) * 100));
+  const spreadText = circular ? `${Math.round(spread)}${unit}` : `${spread.toFixed(1)} ${unit}`;
+  const avgText = circular ? `${degToDir(avg)} ${Math.round(avg)}°` : `${Math.round(avg)} ${unit}`;
+  return `<div class="agree-row">
+    <div class="agr-lbl">${escapeHtml(label)}</div>
+    <div class="agree-bar-wrap"><div class="agree-bar ${cls}" style="width:${pct}%"></div></div>
+    <div class="agr-spread">${escapeHtml(spreadText)}</div>
+    <div class="agr-avg">avg ${escapeHtml(avgText)}</div>
+  </div>`;
+}
+
+function circularSpread(degs){
+  const mean = windDirMean(degs);
+  if(mean == null) return 0;
+  return degs.reduce((max, d) => Math.max(max, Math.abs(signedAngularDelta(mean, d))), 0) * 2;
+}
+
+const COMPARE_MODEL_COLORS = {
+  gfs:'#3b82f6',
+  ecmwf:'#10b981',
+  aifs:'#8b5cf6',
+  arpege:'#d79a2b',
+  arome:'#f97316',
+  icon:'#a855f7',
+  ukmo:'#475569',
+  metno:'#0284c7',
+  harmonie:'#ca8a04',
+  meteoswiss:'#dc2626',
+  lamma:'#2f5f8f',
+  wam:'#0f766e',
+  squid:'#e11d48',
+};
+const COMPARE_MODEL_FALLBACK_COLORS = ['#3b82f6', '#10b981', '#f97316', '#a855f7', '#e11d48', '#64748b'];
+
+function compareModelKey(cfg){
+  const text = [cfg?.id, cfg?.label, cfg?.detail].filter(Boolean).join(' ').toLowerCase();
+  if(text.includes('wam') || text.includes('mfwam') || text.includes('wave grib')) return 'wam';
+  if(text.includes('aifs')) return 'aifs';
+  if(text.includes('ecmwf') || text.includes('ifs')) return 'ecmwf';
+  if(text.includes('gfs')) return 'gfs';
+  if(text.includes('arpege')) return 'arpege';
+  if(text.includes('arome')) return 'arome';
+  if(text.includes('ukmo')) return 'ukmo';
+  if(text.includes('metno') || text.includes('nordic')) return 'metno';
+  if(text.includes('harmonie') || text.includes('knmi') || text.includes('dmi')) return 'harmonie';
+  if(text.includes('meteoswiss') || text.includes('icon_ch')) return 'meteoswiss';
+  if(text.includes('icon')) return 'icon';
+  if(text.includes('lamma')) return 'lamma';
+  if(text.includes('squid')) return 'squid';
+  return '';
+}
+
+function compareModelColor(cfg, index = 0){
+  const key = compareModelKey(cfg);
+  return COMPARE_MODEL_COLORS[key] || COMPARE_MODEL_FALLBACK_COLORS[index % COMPARE_MODEL_FALLBACK_COLORS.length];
+}
+
+function modelHasAnyValue(model, key){
+  return Array.isArray(model?.[key]) && model[key].some(value => value != null && !isNaN(value));
+}
+
+function comparisonWindChartEntries(){
+  return comparisonLoadedEntries().filter(({ model }) => (
+    modelHasAnyValue(model, 'tws') || modelHasAnyValue(model, 'gust') || modelHasAnyValue(model, 'twd')
+  ));
+}
+
+function renderComparisonCharts(){
+  const wrap = document.getElementById('compareChartWrap');
+  const entries = comparisonWindChartEntries();
+  const hours = comparisonHours(entries);
+  if(!wrap || entries.length < 1 || hours.length < 2){
+    if(wrap) wrap.style.display = 'none';
+    return;
+  }
+  wrap.style.display = 'block';
+  renderCompareLineChart('compareChartTws', 'tws', 'kt', false, entries);
+  renderCompareLineChart('compareChartGust', 'gust', 'kt', false, entries);
+  renderCompareLineChart('compareChartTwd', 'twd', '°', true, entries);
+  renderCompareLegend(entries);
+}
+
+function compareSeries(entries, hours, key){
+  return entries.map((entry, index) => ({
+    label: entry.cfg.label,
+    color: compareModelColor(entry.cfg, index),
+    values: hours.map(hour => {
+      const d = compareHourData(entry.model, hour);
+      return d ? d[key] : null;
+    }),
+  }));
+}
+
+function renderCompareLineChart(canvasId, key, unit, isDirection, entries = comparisonWindChartEntries()){
+  const canvas = document.getElementById(canvasId);
+  if(!canvas) return;
+  const hours = comparisonHours(entries);
+  const series = compareSeries(entries, hours, key);
+  const values = series.flatMap(s => s.values).filter(v => v != null);
+  if(!values.length){
+    const ctx = canvas.getContext('2d');
+    if(ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+    return;
+  }
+
+  let width = 0;
+  let el = canvas.parentElement;
+  while(el && !width){ width = el.offsetWidth; el = el.parentElement; }
+  width = Math.max(320, (width || 820) - 48);
+  const height = isDirection ? 220 : 280;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = width * dpr;
+  canvas.height = height * dpr;
+  canvas.style.width = `${width}px`;
+  canvas.style.height = `${height}px`;
+
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, width, height);
+
+  const styles = getComputedStyle(document.documentElement);
+  const textCol = styles.getPropertyValue('--muted').trim() || '#777';
+  const gridCol = styles.getPropertyValue('--border').trim() || '#ddd';
+  const avgCol = styles.getPropertyValue('--text').trim() || '#111';
+  const surfaceCol = styles.getPropertyValue('--surface').trim() || '#fff';
+  const primaryCol = styles.getPropertyValue('--primary').trim() || '#2b5f91';
+  const pad = { t:24, r:16, b:32, l:42 };
+  const chartW = width - pad.l - pad.r;
+  const chartH = height - pad.t - pad.b;
+  const yMin = isDirection ? 0 : 0;
+  const yMax = isDirection ? 360 : Math.max(20, Math.ceil((Math.max(...values) + 4) / 5) * 5);
+  const xFor = i => pad.l + (i / (hours.length - 1 || 1)) * chartW;
+  const yFor = v => pad.t + chartH - ((v - yMin) / (yMax - yMin || 1)) * chartH;
+
+  ctx.font = '11px sans-serif';
+  ctx.textAlign = 'right';
+  if(isDirection){
+    [0, 90, 180, 270, 360].forEach((deg, i) => {
+      const y = yFor(deg);
+      ctx.strokeStyle = gridCol;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + chartW, y); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = textCol;
+      ctx.fillText(['N', 'E', 'S', 'W', 'N'][i], pad.l - 6, y + 4);
+    });
+  } else {
+    for(let i = 0; i <= 4; i++){
+      const v = yMin + (yMax - yMin) * i / 4;
+      const y = yFor(v);
+      ctx.strokeStyle = gridCol;
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + chartW, y); ctx.stroke();
+      ctx.fillStyle = textCol;
+      ctx.fillText(`${Math.round(v)} ${unit}`, pad.l - 6, y + 4);
+    }
+  }
+
+  ctx.textAlign = 'center';
+  const labelStep = Math.max(1, Math.ceil(hours.length / 8));
+  hours.forEach((hour, i) => {
+    if(i % labelStep !== 0 && i !== hours.length - 1) return;
+    ctx.fillStyle = textCol;
+    ctx.fillText(comparisonHourLabel(hour), xFor(i), height - pad.b + 16);
+  });
+
+  if(!isDirection){
+    const bandMin = hours.map((_, i) => {
+      const vals = series.map(s => s.values[i]).filter(v => v != null);
+      return vals.length ? Math.min(...vals) : null;
+    });
+    const bandMax = hours.map((_, i) => {
+      const vals = series.map(s => s.values[i]).filter(v => v != null);
+      return vals.length ? Math.max(...vals) : null;
+    });
+    ctx.beginPath();
+    bandMax.forEach((v, i) => {
+      if(v == null) return;
+      const x = xFor(i);
+      const y = yFor(v);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    for(let i = bandMin.length - 1; i >= 0; i--){
+      if(bandMin[i] == null) continue;
+      ctx.lineTo(xFor(i), yFor(bandMin[i]));
+    }
+    ctx.closePath();
+    ctx.fillStyle = primaryCol;
+    ctx.globalAlpha = 0.12;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  series.forEach(s => {
+    drawCompareSeries(ctx, s.values, hours, xFor, yFor, s.color, isDirection, 1.7, 0.72);
+  });
+
+  const avgSeries = hours.map((_, i) => {
+    const vals = series.map(s => s.values[i]).filter(v => v != null);
+    if(!vals.length) return null;
+    return isDirection ? windDirMean(vals) : vals.reduce((a, b) => a + b, 0) / vals.length;
+  });
+  drawCompareSeries(ctx, avgSeries, hours, xFor, yFor, avgCol, isDirection, 3, 1);
+  drawCompareHourMarker(ctx, hours, avgSeries, xFor, yFor, pad, chartH, height, unit, isDirection, avgCol, surfaceCol);
+  attachCompareChartScrub(canvas, hours);
+}
+
+function drawCompareSeries(ctx, values, hours, xFor, yFor, color, isDirection, lineWidth, alpha){
+  ctx.beginPath();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lineWidth;
+  ctx.lineJoin = 'round';
+  ctx.globalAlpha = alpha;
+  let started = false;
+  let prev = null;
+  values.forEach((value, i) => {
+    if(value == null){ started = false; prev = null; return; }
+    const jump = isDirection && prev != null && Math.abs(value - prev) > 180;
+    const x = xFor(i);
+    const y = yFor(value);
+    if(!started || jump){ ctx.moveTo(x, y); started = true; }
+    else ctx.lineTo(x, y);
+    prev = value;
+  });
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+}
+
+function drawCompareHourMarker(ctx, hours, avgSeries, xFor, yFor, pad, chartH, height, unit, isDirection, avgCol, surfaceCol){
+  const idx = hours.findIndex(h => Number(h) === Number(comparisonSelectedHour));
+  if(idx < 0) return;
+  const x = xFor(idx);
+  ctx.strokeStyle = avgCol;
+  ctx.globalAlpha = 0.22;
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([3, 3]);
+  ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, pad.t + chartH); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.globalAlpha = 1;
+
+  const avg = avgSeries[idx];
+  if(avg == null) return;
+  const y = yFor(avg);
+  ctx.fillStyle = avgCol;
+  ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = surfaceCol;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  const label = isDirection ? `avg ${degToDir(avg)}` : `avg ${Math.round(avg)} ${unit}`;
+  ctx.font = 'bold 11px sans-serif';
+  const textW = ctx.measureText(label).width;
+  const w = textW + 12;
+  const h = 20;
+  const lx = Math.max(pad.l + w / 2, Math.min(x, xFor(hours.length - 1) - w / 2));
+  const ly = pad.t + 4;
+  ctx.fillStyle = surfaceCol;
+  ctx.strokeStyle = avgCol;
+  ctx.lineWidth = 1.5;
+  roundRect(ctx, lx - w / 2, ly, w, h, 4);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = avgCol;
+  ctx.textAlign = 'center';
+  ctx.fillText(label, lx, ly + 14);
+}
+
+function roundRect(ctx, x, y, w, h, r){
+  if(ctx.roundRect){
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, r);
+    return;
+  }
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function attachCompareChartScrub(canvas, hours){
+  let pendingHour = null;
+  const hourFromEvent = e => {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const frac = Math.max(0, Math.min(1, (clientX - rect.left - 42) / Math.max(1, rect.width - 58)));
+    const idx = Math.round(frac * (hours.length - 1));
+    return hours[Math.max(0, Math.min(hours.length - 1, idx))];
+  };
+  const preview = e => {
+    pendingHour = hourFromEvent(e);
+    const label = document.getElementById('compareHourLabel');
+    if(label) label.textContent = comparisonHourLabel(pendingHour);
+    const slider = document.getElementById('compareHourSlider');
+    if(slider){
+      slider.value = pendingHour;
+      setComparisonSliderFill(slider);
+    }
+  };
+  const commit = () => {
+    if(pendingHour != null) commitComparisonHour(pendingHour);
+    pendingHour = null;
+    canvas.onmousemove = null;
+    canvas.ontouchmove = null;
+  };
+  canvas.style.cursor = 'ew-resize';
+  canvas.onmousedown = e => { e.preventDefault(); preview(e); canvas.onmousemove = preview; document.onmouseup = commit; };
+  canvas.ontouchstart = e => { e.preventDefault(); preview(e); canvas.ontouchmove = ev => { ev.preventDefault(); preview(ev); }; document.ontouchend = commit; };
+}
+
+function renderCompareLegend(entries){
+  const legend = document.getElementById('compareChartLegend');
+  if(!legend) return;
+  const avgCol = getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || '#111';
+  legend.innerHTML = entries.map((entry, index) => (
+    `<div class="mcl-item"><span class="mcl-dot" style="background:${compareModelColor(entry.cfg, index)}"></span>${escapeHtml(entry.cfg.label)}</div>`
+  )).join('') + `<div class="mcl-item"><span class="mcl-dot" style="background:${avgCol}"></span><strong>Average</strong></div>`;
+}
+
+function setupComparisonChartResize(){
+  const panel = document.getElementById('comparePanel');
+  if(!panel || typeof ResizeObserver === 'undefined') return;
+  if(comparisonChartResizeObserver) comparisonChartResizeObserver.disconnect();
+  comparisonChartResizeObserver = new ResizeObserver(() => {
+    if(document.getElementById('compareChartWrap')?.style.display !== 'none') renderComparisonCharts();
+  });
+  comparisonChartResizeObserver.observe(panel);
+}
+
+function briefIcon(type){
+  const icons = {
+    wind: '<svg viewBox="0 0 24 24"><path d="M4 8h10a3 3 0 1 0-3-3"/><path d="M4 13h15a3 3 0 1 1-3 3"/><path d="M4 18h7"/></svg>',
+    temp: '<svg viewBox="0 0 24 24"><path d="M10 14.5V5a3 3 0 0 1 6 0v9.5"/><path d="M16 14.5a5 5 0 1 1-6 0"/><path d="M13 7v8"/></svg>',
+    sky: '<svg viewBox="0 0 24 24"><path d="M7 17h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 2A3 3 0 0 0 7 17Z"/></svg>',
+    gwd: '<svg viewBox="0 0 24 24"><path d="M12 3v18"/><path d="m7 8 5-5 5 5"/><path d="M5 16c3-2 5-2 7 0s4 2 7 0"/></svg>',
+    sea: '<svg viewBox="0 0 24 24"><path d="M3 9c2.5-2 4.5-2 7 0s4.5 2 7 0 3.5-2 4 0"/><path d="M3 15c2.5-2 4.5-2 7 0s4.5 2 7 0 3.5-2 4 0"/></svg>',
+    cape: '<svg viewBox="0 0 24 24"><path d="M13 3 5 14h6l-1 7 8-12h-6l1-6Z"/></svg>',
+    rain: '<svg viewBox="0 0 24 24"><path d="M7 17h10a4 4 0 0 0 0-8 6 6 0 0 0-11.5 2A3 3 0 0 0 7 17Z"/><path d="M8 20v1"/><path d="M12 19v2"/><path d="M16 20v1"/></svg>',
+    uv: '<svg viewBox="0 0 24 24"><path d="M12 4v2"/><path d="M12 18v2"/><path d="M4 12h2"/><path d="M18 12h2"/><path d="m6.3 6.3 1.4 1.4"/><path d="m16.3 16.3 1.4 1.4"/><path d="m17.7 6.3-1.4 1.4"/><path d="m7.7 16.3-1.4 1.4"/><circle cx="12" cy="12" r="4"/></svg>',
+    data: '<svg viewBox="0 0 24 24"><path d="M5 19V5"/><path d="M5 19h14"/><path d="M9 15v-4"/><path d="M13 15V8"/><path d="M17 15v-2"/></svg>',
+  };
+  return `<span class="row-icon" aria-hidden="true">${icons[type] || icons.data}</span>`;
+}
+
+function fetchSelectedSource(){
+  const source = document.getElementById('forecastSource')?.value || 'grib';
+  return source === 'grib' ? loadSquidGrib() : fetchForecast();
+}
+
+function applyVesselPreset(val){
+  if(!val){ renderBrief(); return; }
+  const builtin = BUILTIN_VESSELS.find(v => v.id === val);
+  if(builtin){
+    document.getElementById('vesselName').value = builtin.boatName;
+    renderBrief();
+    return;
+  }
+  const saved = getSavedVessels().find(v => v.id === val);
+  if(saved) document.getElementById('vesselName').value = saved.boatName;
+  renderBrief();
+}
+
+function loadImaSorrentoPreset(){
+  loadEventById('ima-sorrento');
+  fetchSelectedSource();
+}
+
+function loadPreset(val){
+  if(!val) return;
+  const parts = val.split(',');
+  const lat = parseFloat(parts[0]);
+  const lon = parseFloat(parts[1]);
+  const name = parts.slice(2).join(',');
+  document.getElementById('venueInput').value = name;
+  document.getElementById('venuePreset').value = val;
+  setPosition(lat, lon, { skipPresetClear: true, pan: true });
+  if(venueMap) venueMap.setZoom(11);
+  fetchSelectedSource();
+}
+
+function buildPeriodList(){
+  const el = document.getElementById('periodList');
+  el.innerHTML = '';
+  PERIODS.forEach(p => {
+    const active = activePeriods.has(p.id);
+    const row = document.createElement('button');
+    row.type = 'button';
+    row.className = 'period-row' + (active ? ' active' : '');
+    row.innerHTML = `
+      <span class="period-check">${active ? '&#10003;' : ''}</span>
+      <span class="pr-name">${p.name}</span>
+      <span class="pr-time">${fmt12(p.from)}–${fmt12(p.to)}</span>`;
+    row.onclick = () => {
+      if(activePeriods.has(p.id)) activePeriods.delete(p.id);
+      else activePeriods.add(p.id);
+      buildPeriodList();
+      renderBrief();
+      renderComparison();
+    };
+    el.appendChild(row);
+  });
+}
+
+function periodHourIndices(periodIds){
+  if(!forecastData?.hours?.length) return [];
+  const idxs = [];
+  PERIODS.filter(p => periodIds.includes(p.id)).forEach(p => {
+    const from = parseInt(p.from.split(':')[0], 10);
+    const to = parseInt(p.to.split(':')[0], 10);
+    forecastData.hours.forEach((h, i) => {
+      if(h >= from && h < to && !idxs.includes(i)) idxs.push(i);
+    });
+  });
+  return idxs.sort((a, b) => a - b);
+}
+
+function briefingTrendIndices(){
+  return periodHourIndices(TREND_PERIOD_IDS);
+}
+
+function trendWindowText(idxs){
+  const n = idxs?.length || 0;
+  if(!n){
+    return `${TREND_WINDOW_LABEL} · no hourly samples for morning · midday · afternoon`;
+  }
+  return `${TREND_WINDOW_LABEL} · ${n} hourly sample${n === 1 ? '' : 's'} (morning · midday · afternoon)`;
+}
+
+function sliceHours(fromStr, toStr){
+  if(!forecastData) return null;
+  const fh = parseInt(fromStr.split(':')[0], 10);
+  const th = parseInt(toStr.split(':')[0], 10);
+  const idxs = forecastData.hours.reduce((acc, h, i) => {
+    if(h >= fh && h < th) acc.push(i);
+    return acc;
+  }, []);
+  if(!idxs.length) return null;
+
+  function vals(arr){
+    return idxs.map(i => arr?.[i]).filter(x => x != null && !isNaN(x));
+  }
+
+  const twdDeg = windDirMean(forecastData.twd, idxs);
+  const gwdDeg = windDirMean(forecastData.gwd, idxs);
+  const waveH = avgValue(forecastData.wave, idxs);
+  const waveDir = windDirMean(forecastData.waveDir, idxs);
+  const rainVals = validVals(forecastData.rain, idxs);
+  const capeMax = maxValue(forecastData.cape, idxs);
+  const uvMax = maxValue(forecastData.uv, idxs);
+
+  return {
+    tempMin: minValue(forecastData.temp, idxs),
+    tempMax: maxValue(forecastData.temp, idxs),
+    twsMin: minValue(forecastData.tws, idxs),
+    twsMax: maxValue(forecastData.tws, idxs),
+    gust: maxValue(forecastData.gust, idxs),
+    twdDeg,
+    twdStr: degToDir(twdDeg),
+    gwdDeg,
+    gwdStr: degToDir(gwdDeg),
+    sky: wmoSky(parseInt(modeValue(forecastData.wmo, idxs), 10)),
+    capeMax,
+    uvMax,
+    rain: rainVals.length ? (forecastMeta?.rainMode === 'rate' ? avgValue(forecastData.rain, idxs) : rainVals.reduce((a, b) => a + b, 0)) : null,
+    waveH,
+    waveDir,
+    waveDirStr: degToDir(waveDir),
+    sea: waveDesc(waveH),
+  };
+}
+
+async function fetchForecast(){
+  const lat = parseFloat(document.getElementById('latInput').value);
+  const lon = parseFloat(document.getElementById('lonInput').value);
+  if(isNaN(lat) || isNaN(lon)){
+    setStatus('red', 'Invalid coordinates');
+    return;
+  }
+
+  const btn = document.getElementById('fetchBtn');
+  btn.disabled = true;
+  setStatus('yellow', 'Contacting Open-Meteo…');
+
+  try {
+  const selDate = document.getElementById('fDate').value;
+  const today = new Date().toISOString().split('T')[0];
+  const targetDate = selDate || today;
+  const dateParam = `&start_date=${targetDate}&end_date=${targetDate}`;
+
+  const modelId = resolveOpenMeteoModelId(document.getElementById('briefingModel').value);
+  const modelCfg = getOpenMeteoModel(modelId);
+  if(!modelCfg) throw new Error('Unknown Open-Meteo model selection.');
+  assertOpenMeteoDateLimit(modelCfg, targetDate);
+
+  const weatherURL = modelCfg.base
+    + `?latitude=${lat}&longitude=${lon}`
+    + '&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,wind_direction_850hPa,wind_gusts_10m,weathercode,cape,uv_index'
+    + '&timezone=Europe%2FRome&wind_speed_unit=kn'
+    + modelCfg.param + dateParam;
+
+  const marineURL = 'https://marine-api.open-meteo.com/v1/marine'
+    + `?latitude=${lat}&longitude=${lon}`
+    + '&hourly=wave_height'
+    + '&timezone=Europe%2FRome' + dateParam;
+
+    const [wRes, mRes] = await Promise.all([fetch(weatherURL), fetch(marineURL)]);
+    if(!wRes.ok) throw new Error(`Weather API ${wRes.status}`);
+
+    const wData = await wRes.json();
+    if(wData.error) throw new Error(wData.reason || 'Weather API error');
+
+    let wave = null;
+    if(mRes.ok){
+      const mData = await mRes.json();
+      wave = mData.hourly?.wave_height || null;
+    }
+
+    const twsSeries = wData.hourly?.wind_speed_10m;
+    if(modelCfg.domainMsg && (!twsSeries || !twsSeries.some(v => v != null))){
+      throw new Error(modelCfg.domainMsg + ' Try ECMWF IFS HRES or ICON-EU.');
+    }
+
+    gribSourceLabel = null;
+    forecastData = {
+      hours: wData.hourly.time.map(t => parseInt(t.split('T')[1], 10)),
+      temp: wData.hourly.temperature_2m,
+      tws: wData.hourly.wind_speed_10m,
+      twd: wData.hourly.wind_direction_10m,
+      gwd: wData.hourly.wind_direction_850hPa,
+      gust: wData.hourly.wind_gusts_10m,
+      wmo: wData.hourly.weathercode,
+      cape: wData.hourly.cape,
+      uv: wData.hourly.uv_index,
+      wave,
+    };
+
+    const stamp = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    const label = openMeteoModelLabel(modelId);
+    const omLabel = `Open-Meteo ${label}`;
+    forecastMeta = {
+      source: 'Open-Meteo',
+      modelLabel: label,
+      model: modelId,
+      date: targetDate,
+      loadedAt: new Date().toISOString(),
+      fieldSources: {
+        wind: omLabel, gust: omLabel, twd: omLabel, gwd: omLabel,
+        temp: omLabel, sky: omLabel, cape: omLabel, rain: omLabel, uv: omLabel, wave: omLabel,
+      },
+    };
+    setStatus('green', `${fmtDate(targetDate)} · ${label} · ${stamp}`);
+    document.getElementById('lastUpdated').textContent = `Fetched ${stamp} UTC local display`;
+    updateSupplementButtonVisibility();
+    renderBrief();
+  } catch(e){
+    setStatus('red', 'Fetch error: ' + e.message);
+    document.getElementById('forecastDoc').innerHTML =
+      `<div class="err">Could not fetch data: ${e.message}</div>`;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function applySquidPayload(payload){
+  if(!payload || !payload.hours || !payload.hours.length){
+    throw new Error('Invalid squid_forecast.json');
+  }
+  const meta = payload.meta || {};
+  forecastData = {
+    hours: payload.hours,
+    tws: payload.tws,
+    twd: payload.twd,
+    gwd: payload.gwd || payload.hours.map(() => null),
+    gust: payload.gust,
+    temp: payload.temp || payload.hours.map(() => null),
+    wmo: payload.wmo || payload.hours.map(() => null),
+    cape: payload.cape || payload.hours.map(() => null),
+    rain: payload.rain || payload.hours.map(() => null),
+    uv: payload.uv || payload.hours.map(() => null),
+    wave: payload.wave || payload.hours.map(() => null),
+    waveDir: payload.waveDir || payload.hours.map(() => null),
+  };
+  gribSourceLabel = meta.modelLabel || 'Squid GRIB';
+  const gribFieldLabel = gribSourceLabel;
+  forecastMeta = {
+    ...meta,
+    source: 'Squid GRIB',
+    loadedAt: new Date().toISOString(),
+    fieldSources: {
+      wind: gribFieldLabel,
+      gust: gribFieldLabel,
+      twd: gribFieldLabel,
+      gwd: gribFieldLabel,
+      temp: seriesHasValues(forecastData.temp) ? gribFieldLabel : '',
+      sky: seriesHasValues(forecastData.wmo) ? gribFieldLabel : '',
+      cape: seriesHasValues(forecastData.cape) ? gribFieldLabel : '',
+      rain: seriesHasValues(forecastData.rain) ? gribFieldLabel : '',
+      uv: seriesHasValues(forecastData.uv) ? gribFieldLabel : '',
+      wave: seriesHasValues(forecastData.wave) ? gribFieldLabel : '',
+    },
+  };
+  const stamp = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  const file = meta.file || 'loaded';
+  const point = formatCoord(meta.lat, meta.lon);
+  const grid = formatCoord(meta.gridLat, meta.gridLon);
+  const run = formatRunTime(meta);
+  const gridText = grid ? `grid ${grid}${meta.gridDistanceKm != null ? ` (${meta.gridDistanceKm} km)` : ''}` : '';
+  const detail = [
+    `${gribSourceLabel}: ${file}`,
+    run ? `run ${run}` : '',
+    `${payload.hours.length} hours`,
+    point ? `pin ${point}` : '',
+    gridText,
+    meta.skippedFiles?.length ? `skipped ${meta.skippedFiles.length} newer out-of-area file(s)` : '',
+  ].filter(Boolean).join(' | ');
+  setSquidHint(detail);
+  setStatus('green', `${gribSourceLabel} · ${file} · ${stamp}`);
+  document.getElementById('lastUpdated').textContent = `GRIB loaded ${stamp}`;
+  updateSupplementButtonVisibility();
+  renderBrief();
+}
+
+async function refreshSquidGribHint(){
+  const el = document.getElementById('squidGribHint');
+  const sel = document.getElementById('squidGribSelect');
+  if(!el) return;
+  if(location.protocol === 'file:'){
+    el.innerHTML = 'Double-click <strong>Start Weather Brief.command</strong>, then use the button below.';
+    return;
+  }
+  try {
+    const res = await fetch('/api/gribs');
+    const h = await res.json();
+    if(!h.dependencyOk){
+      el.textContent = 'GRIB tools missing. Run: python3 -m pip install eccodes cfgrib';
+      return;
+    }
+    if(sel){
+      const current = sel.value;
+      sel.innerHTML = '<option value="">Best usable for pin (auto)</option>';
+      (h.gribs || []).forEach(grib => {
+        const opt = document.createElement('option');
+        opt.value = grib.name;
+        opt.textContent = describeGrib(grib);
+        sel.appendChild(opt);
+      });
+      if([...sel.options].some(opt => opt.value === current)) sel.value = current;
+    }
+    if(h.gribs?.length){
+      el.textContent = `GRIB files available: ${h.gribs.length}. Auto uses newest file that covers the pin.`;
+    } else {
+      el.textContent = 'No GRIB in Squid Gribs/ yet - download in Squid X first.';
+    }
+  } catch {
+    el.textContent = 'Start via Start Weather Brief.command, then load GRIB.';
+  }
+}
+
+async function loadSquidGrib(){
+  const lat = parseFloat(document.getElementById('latInput').value);
+  const lon = parseFloat(document.getElementById('lonInput').value);
+  if(isNaN(lat) || isNaN(lon)){
+    setStatus('red', 'Set pin latitude and longitude first.');
+    return;
+  }
+  const btn = document.getElementById('squidGribBtn');
+  btn.disabled = true;
+  const selected = document.getElementById('squidGribSelect')?.value || '';
+  const label = selected || 'best usable GRIB';
+  setStatus('yellow', `Extracting ${label} at pin…`);
+  try {
+    if(location.protocol === 'file:'){
+      throw new Error('Open Weather Brief via Start Weather Brief.command (not the HTML file directly).');
+    }
+    const fileParam = selected ? `&file=${encodeURIComponent(selected)}` : '';
+    const res = await fetch(`/api/squid-grib?lat=${lat}&lon=${lon}${fileParam}&_=${Date.now()}`);
+    const data = await readApiJson(res, 'GRIB extract endpoint');
+    applySquidPayload(data);
+    refreshSquidGribHint();
+    if(gribNeedsOpenMeteoSupplement()){
+      await supplementForecastFromOpenMeteo({ silent: false, auto: true });
+    }
+  } catch(e){
+    setStatus('red', e.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function selectedPeriodIndices(){
+  if(!forecastData?.hours?.length) return [];
+  const active = PERIODS.filter(p => activePeriods.has(p.id));
+  const idxs = [];
+  active.forEach(p => {
+    const from = parseInt(p.from.split(':')[0], 10);
+    const to = parseInt(p.to.split(':')[0], 10);
+    forecastData.hours.forEach((h, i) => {
+      if(h >= from && h < to && !idxs.includes(i)) idxs.push(i);
+    });
+  });
+  if(idxs.length) return idxs.sort((a, b) => a - b);
+  return forecastData.hours.map((_, i) => i).slice(0, 24);
+}
+
+function signedAngularDelta(fromDeg, toDeg){
+  if(fromDeg == null || toDeg == null) return null;
+  return ((toDeg - fromDeg + 540) % 360) - 180;
+}
+
+function edgeSampleIndices(idxs, side){
+  if(!idxs.length) return [];
+  const n = Math.max(1, Math.ceil(idxs.length * 0.25));
+  return side === 'end' ? idxs.slice(-n) : idxs.slice(0, n);
+}
+
+function splitSampleIndices(idxs){
+  if(idxs.length < 3) return { early: idxs, mid: idxs, late: idxs };
+  const third = Math.max(1, Math.floor(idxs.length / 3));
+  return {
+    early: idxs.slice(0, third),
+    mid: idxs.slice(third, idxs.length - third),
+    late: idxs.slice(-third),
+  };
+}
+
+function avgHourForIndices(idxs){
+  const hours = idxs.map(i => forecastData.hours?.[i]).filter(h => h != null && !isNaN(h));
+  return hours.length ? hours.reduce((a, b) => a + b, 0) / hours.length : null;
+}
+
+function dayPartForIndices(idxs){
+  const h = avgHourForIndices(idxs);
+  if(h == null) return 'through the period';
+  if(h < 7) return 'early';
+  if(h < 10) return 'early morning';
+  if(h < 12) return 'morning';
+  if(h < 15) return 'midday';
+  if(h < 18) return 'afternoon';
+  return 'evening';
+}
+
+function naturalSkyLabel(sky){
+  if(!sky || sky === 'Variable') return '';
+  return sky
+    .replace('Clear sky', 'clear')
+    .replace('Mainly clear', 'mainly clear')
+    .replace('Partly cloudy', 'partly cloudy')
+    .replace('Overcast', 'overcast')
+    .toLowerCase();
+}
+
+function twdShiftPhrase(delta, context = 'through the period'){
+  if(delta == null || Math.abs(delta) < 8) return `TWD broadly steady ${context}`;
+  return delta < 0
+    ? `TWD backing left ${context}`
+    : `TWD veering right ${context}`;
+}
+
+function trendShiftNarrative(idxs, startIdxs, endIdxs, thirds){
+  const startTwd = windDirMean(forecastData.twd, startIdxs);
+  const endTwd = windDirMean(forecastData.twd, endIdxs);
+  const earlyTwd = windDirMean(forecastData.twd, thirds.early);
+  const midTwd = windDirMean(forecastData.twd, thirds.mid);
+  const lateTwd = windDirMean(forecastData.twd, thirds.late);
+  const twdDelta = signedAngularDelta(startTwd, endTwd);
+  const earlyMidDelta = signedAngularDelta(earlyTwd, midTwd);
+  const midLateDelta = signedAngularDelta(midTwd, lateTwd);
+
+  let narrative = '';
+  if(
+    earlyMidDelta != null &&
+    midLateDelta != null &&
+    Math.abs(earlyMidDelta) >= 8 &&
+    Math.abs(midLateDelta) >= 8 &&
+    Math.sign(earlyMidDelta) !== Math.sign(midLateDelta)
+  ){
+    const earlyPart = dayPartForIndices(thirds.early);
+    narrative = earlyMidDelta < 0
+      ? `backing left ${earlyPart}, then veering right later`
+      : `veering right ${earlyPart}, then backing left later`;
+  } else if(earlyMidDelta != null && Math.abs(earlyMidDelta) >= 8 && (midLateDelta == null || Math.abs(midLateDelta) < 8)){
+    narrative = twdShiftPhrase(earlyMidDelta, dayPartForIndices(thirds.early)).replace(/^TWD /, '');
+  } else if(midLateDelta != null && Math.abs(midLateDelta) >= 8 && (earlyMidDelta == null || Math.abs(earlyMidDelta) < 8)){
+    narrative = twdShiftPhrase(midLateDelta, `from ${dayPartForIndices(thirds.mid)}`).replace(/^TWD /, '');
+  } else if(twdDelta != null && Math.abs(twdDelta) >= 8){
+    narrative = twdDelta < 0 ? 'backing left through the period' : 'veering right through the period';
+  } else {
+    narrative = 'broadly steady through the period';
+  }
+  return { startTwd, endTwd, twdDelta, narrative };
+}
+
+function renderDailyDetailHtml(lines){
+  if(!lines?.length) return '';
+  return `<div class="daily-detail-list">${lines.map(line =>
+    `<div class="daily-detail-row">${briefIcon(line.type)}<span>${line.html}</span></div>`
+  ).join('')}</div>`;
+}
+
+function trendSummaryText(trend){
+  return (trend?.lines || []).map(line => line.text).filter(Boolean).join('\n');
+}
+
+function trendSummary(idxs){
+  const empty = {
+    lines: [{ type: 'data', html: 'Load forecast data to generate trend lines.', text: 'Load forecast data to generate trend lines.' }],
+    startTwd: null, endTwd: null, twdDelta: null, startTws: null, endTws: null, twsDelta: null,
+  };
+  if(!idxs.length) return empty;
+
+  const startIdxs = edgeSampleIndices(idxs, 'start');
+  const endIdxs = edgeSampleIndices(idxs, 'end');
+  const thirds = splitSampleIndices(idxs);
+  const lines = [];
+  const twdTrend = trendShiftNarrative(idxs, startIdxs, endIdxs, thirds);
+  const startTwd = twdTrend.startTwd;
+  const endTwd = twdTrend.endTwd;
+  const twdDelta = twdTrend.twdDelta;
+
+  if(startTwd != null && endTwd != null){
+    const arrow = `<strong>${escapeHtml(degToDir(startTwd))}</strong> ${Math.round(startTwd)}° → <strong>${escapeHtml(degToDir(endTwd))}</strong> ${Math.round(endTwd)}°`;
+    const textArrow = `${degToDir(startTwd)} ${Math.round(startTwd)}° → ${degToDir(endTwd)} ${Math.round(endTwd)}°`;
+    lines.push({
+      type: 'wind',
+      html: `TWD ${arrow} · ${escapeHtml(twdTrend.narrative)}`,
+      text: `TWD ${textArrow} · ${twdTrend.narrative}`,
+    });
+  }
+
+  const startGwd = windDirMean(forecastData.gwd, startIdxs);
+  const endGwd = windDirMean(forecastData.gwd, endIdxs);
+  if(startGwd != null && endGwd != null && validVals(forecastData.gwd, idxs).length >= 3){
+    const gwdDelta = signedAngularDelta(startGwd, endGwd);
+    const gwdArrow = `<strong>${escapeHtml(degToDir(startGwd))}</strong> ${Math.round(startGwd)}° → <strong>${escapeHtml(degToDir(endGwd))}</strong> ${Math.round(endGwd)}°`;
+    let gwdNote = 'broadly steady';
+    if(gwdDelta != null && Math.abs(gwdDelta) >= 8) gwdNote = gwdDelta < 0 ? 'backing left' : 'veering right';
+    lines.push({
+      type: 'gwd',
+      html: `GWD ${gwdArrow} · ${escapeHtml(gwdNote)}`,
+      text: `GWD ${degToDir(startGwd)} ${Math.round(startGwd)}° → ${degToDir(endGwd)} ${Math.round(endGwd)}° · ${gwdNote}`,
+    });
+  }
+
+  const startTws = avgValue(forecastData.tws, startIdxs);
+  const endTws = avgValue(forecastData.tws, endIdxs);
+  const twsMin = minValue(forecastData.tws, idxs);
+  const twsMax = maxValue(forecastData.tws, idxs);
+  const gustMax = maxValue(forecastData.gust, idxs);
+  const twsDelta = startTws == null || endTws == null ? null : endTws - startTws;
+  if(startTws != null && endTws != null){
+    const trendKt = windSpeedValueHtml(`${Math.round(startTws)} → ${Math.round(endTws)} kt`, endTws);
+    const rangeKt = windSpeedValueHtml(fmtRange(twsMin, twsMax, ' kt'), twsMax);
+    let speedNote = 'steady';
+    if(twsDelta != null && Math.abs(twsDelta) >= 1.5) speedNote = twsDelta > 0 ? 'building' : 'easing';
+    const gustPart = gustMax == null ? '' : ` · gust peak ${windSpeedValueHtml(`${Math.round(gustMax)} kt`, gustMax)}`;
+    lines.push({
+      type: 'wind',
+      html: `TWS ${trendKt} · ${escapeHtml(speedNote)} · range ${rangeKt}${gustPart}`,
+      text: `TWS ${Math.round(startTws)} → ${Math.round(endTws)} kt · ${speedNote} · range ${fmtRange(twsMin, twsMax, ' kt')}${gustMax == null ? '' : ` · gust peak ${Math.round(gustMax)} kt`}`,
+    });
+  }
+
+  const earlyTemp = avgValue(forecastData.temp, thirds.early);
+  const lateTemp = avgValue(forecastData.temp, thirds.late);
+  const tempMin = minValue(forecastData.temp, idxs);
+  const tempMax = maxValue(forecastData.temp, idxs);
+  if(tempMin != null && tempMax != null){
+    let tempNote = `range ${fmtRange(tempMin, tempMax, '°C')}`;
+    if(earlyTemp != null && lateTemp != null && Math.abs(lateTemp - earlyTemp) >= 1){
+      tempNote = `${earlyTemp.toFixed(0)} → ${lateTemp.toFixed(0)}°C · ${tempNote}`;
+    }
+    lines.push({ type: 'temp', html: escapeHtml(tempNote), text: tempNote });
+  }
+
+  const earlySky = wmoSky(parseInt(modeValue(forecastData.wmo, thirds.early), 10));
+  const lateSky = wmoSky(parseInt(modeValue(forecastData.wmo, thirds.late), 10));
+  if(earlySky && lateSky && earlySky !== 'Variable' && lateSky !== 'Variable'){
+    const early = naturalSkyLabel(earlySky);
+    const late = naturalSkyLabel(lateSky);
+    const skyText = early === late
+      ? `mainly ${early} across the period`
+      : `${earlySky} early → ${lateSky} late`;
+    lines.push({ type: 'sky', html: escapeHtml(skyText), text: skyText });
+  }
+
+  const rainMax = maxValue(forecastData.rain, idxs);
+  const rainTotal = validVals(forecastData.rain, idxs).reduce((a, b) => a + b, 0);
+  if(rainMax != null && (rainMax >= 0.2 || rainTotal >= 0.5)){
+    const rainText = `peak ${fmtRain(rainMax, forecastMeta?.rainMode)} · period total ${fmtRain(rainTotal, forecastMeta?.rainMode)}`;
+    lines.push({ type: 'rain', html: `Rain ${escapeHtml(rainText)}`, text: `Rain ${rainText}` });
+  }
+
+  const capeMax = maxValue(forecastData.cape, idxs);
+  if(capeMax != null && capeMax >= 100){
+    const capeHtml = `<span class="cape-pill ${capeClass(capeMax)}">${Math.round(capeMax)} J/kg</span> ${escapeHtml(capeLabel(capeMax))}`;
+    lines.push({
+      type: 'cape',
+      html: `CAPE ${capeHtml}`,
+      text: `CAPE ${Math.round(capeMax)} J/kg (${capeLabel(capeMax)})`,
+    });
+  }
+
+  const uvMax = maxValue(forecastData.uv, idxs);
+  if(uvMax != null && uvMax >= 3){
+    const uvText = `peak ${Math.round(uvMax)} · ${uvLabel(uvMax)}`;
+    lines.push({ type: 'uv', html: `UV ${escapeHtml(uvText)}`, text: `UV ${uvText}` });
+  }
+
+  const earlyWave = avgValue(forecastData.wave, thirds.early);
+  const lateWave = avgValue(forecastData.wave, thirds.late);
+  const waveMean = avgValue(forecastData.wave, idxs);
+  const earlyWaveDir = windDirMean(forecastData.waveDir, thirds.early);
+  const lateWaveDir = windDirMean(forecastData.waveDir, thirds.late);
+  if(waveMean != null || earlyWave != null){
+    let seaText = '';
+    if(earlyWave != null && lateWave != null && Math.abs(lateWave - earlyWave) >= 0.2){
+      seaText = `${waveDesc(earlyWave)} ${earlyWave.toFixed(1)} → ${lateWave.toFixed(1)} m`;
+    } else if(waveMean != null) {
+      seaText = `${waveDesc(waveMean)} sea near ${waveMean.toFixed(1)} m`;
+    }
+    if(earlyWaveDir != null && lateWaveDir != null){
+      seaText += ` · wave dir ${degToDir(earlyWaveDir)} ${Math.round(earlyWaveDir)}° → ${degToDir(lateWaveDir)} ${Math.round(lateWaveDir)}°`;
+    }
+    if(seaText){
+      lines.push({ type: 'sea', html: `Sig Wave ${escapeHtml(seaText)}`, text: `Sig Wave ${seaText}` });
+    }
+  }
+
+  return {
+    lines,
+    text: trendSummaryText({ lines }),
+    startTwd,
+    endTwd,
+    twdDelta,
+    startTws,
+    endTws,
+    twsDelta,
+  };
+}
+
+function renderDailyOverview(modelLabel, sourceNote, coordMeta, venue, dateVal, note, vessel, eventName, raceDay){
+  if(!forecastData) return '';
+  const trendIdxs = briefingTrendIndices();
+  const trend = trendSummary(trendIdxs);
+  const windowText = trendWindowText(trendIdxs);
+  const dateText = dateVal ? fmtDate(dateVal) : '';
+  const cleanCoord = coordMeta.replace(' · ', '');
+  const runInfo = runBadgeInfo(modelLabel);
+
+  return `<section class="daily-card">
+    <div class="daily-top">
+      <div>
+        <div class="daily-kicker">Daily Briefing</div>
+        <div class="daily-title"><span class="boat-name">${escapeHtml(vessel)}</span></div>
+        <div class="daily-context">
+          ${eventName ? `<span>${escapeHtml(eventName)}</span>` : ''}
+          ${raceDay ? `<span>${escapeHtml(raceDay)}</span>` : ''}
+          ${venue ? `<span>${escapeHtml(venue)}</span>` : ''}
+          ${dateText ? `<span>${escapeHtml(dateText)}</span>` : ''}
+          ${cleanCoord ? `<span>${escapeHtml(cleanCoord)}</span>` : ''}
+        </div>
+        ${note ? `<div class="daily-note">${escapeHtml(note)}</div>` : ''}
+      </div>
+      <div class="daily-badge">
+        <div class="run-main">${escapeHtml(runInfo.primary)}</div>
+        <div class="run-sub">${escapeHtml(runInfo.secondary)}</div>
+      </div>
+    </div>
+    <div class="daily-detail">
+      ${renderDailyDetailHtml(trend.lines)}
+      ${buildBriefSourceNote() ? `<div class="daily-source">${escapeHtml(buildBriefSourceNote())}</div>` : ''}
+    </div>
+    <div class="brief-strip window-only">
+      <div class="brief-item">
+        <div class="brief-label">Trend window</div>
+        <div class="brief-value">${escapeHtml(windowText)}</div>
+      </div>
+    </div>
+  </section>`;
+}
+
+function renderBrief(){
+  const vessel = document.getElementById('vesselName')?.value.trim() || 'Vessel';
+  const eventName = document.getElementById('eventName')?.value.trim() || '';
+  const raceDay = document.getElementById('raceDay')?.value.trim() || '';
+  const venue = document.getElementById('venueInput').value || 'Venue';
+  const dateVal = document.getElementById('fDate').value;
+  const note = document.getElementById('fNote').value.trim();
+  const footer = document.getElementById('fFooter').value.trim();
+  const model = document.getElementById('briefingModel').value;
+  const modelLabel = gribSourceLabel || openMeteoModelLabel(model) || 'Auto';
+  const sourceNote = buildBriefSourceNote() || (gribSourceLabel ? 'Squid GRIB' : 'Open-Meteo · Europe/Rome');
+  const lat = parseFloat(document.getElementById('latInput').value);
+  const lon = parseFloat(document.getElementById('lonInput').value);
+  const coordMeta = (!isNaN(lat) && !isNaN(lon))
+    ? `${Math.abs(lat).toFixed(3)}°${lat >= 0 ? 'N' : 'S'} ${Math.abs(lon).toFixed(3)}°${lon >= 0 ? 'E' : 'W'} · `
+    : '';
+
+  let html = forecastData ? '' : `<header class="f-header">
+    <div class="f-venue">${escapeHtml(vessel)}</div>
+    ${dateVal ? `<div class="f-date">${fmtDate(dateVal)}</div>` : ''}
+    <div class="f-meta">${[eventName, raceDay, venue].filter(Boolean).map(escapeHtml).join(' · ')}</div>
+    <div class="f-meta">${coordMeta}${modelLabel} · ${sourceNote}</div>
+    ${note ? `<div class="f-note">${escapeHtml(note)}</div>` : ''}
+  </header>`;
+
+  if(forecastData){
+    html += renderDailyOverview(modelLabel, sourceNote, coordMeta, venue, dateVal, note, vessel, eventName, raceDay);
+  }
+
+  const active = PERIODS.filter(p => activePeriods.has(p.id));
+  if(!active.length){
+    html += '<div class="empty">Select at least one period.</div>';
+  } else {
+    html += `<div class="day-row-title">${dateVal ? fmtDate(dateVal).split(' ')[0] : 'Daily'} <span>${dateVal ? fmtDate(dateVal).replace(/^[^ ]+ /, '') : 'Selected briefing periods'}</span></div>`;
+  }
+
+  active.forEach((p, idx) => {
+    const d = sliceHours(p.from, p.to);
+    const cls = 'pcard c' + Math.min(idx, 5);
+    if(!d){
+      html += `<article class="${cls}">
+        <div class="pt-row"><span class="pt-name">${p.name}</span><span class="pt-time">${fmt12(p.from)}–${fmt12(p.to)}</span></div>
+        <div class="frow">${briefIcon('data')}<span>No data — fetch forecast first.</span></div>
+      </article>`;
+      return;
+    }
+    const gwdPart = d.gwdDeg != null
+      ? `GWD <strong>${d.gwdStr}</strong> ${Math.round(d.gwdDeg)}°`
+      : 'GWD —';
+    const waveDirPart = d.waveDir != null ? ` · Wave Direction <strong>${d.waveDirStr}</strong> ${Math.round(d.waveDir)}°` : '';
+    const wavePart = d.waveH != null ? `Sig Wave <strong>${d.waveH.toFixed(1)} m</strong>${waveDirPart}` : (d.waveDir != null ? `Wave Direction <strong>${d.waveDirStr}</strong> ${Math.round(d.waveDir)}°` : '');
+    const twsPart = fmtRange(d.twsMin, d.twsMax, ' kt');
+    const gustPart = d.gust == null ? '—' : `${Math.round(d.gust)} kt`;
+    const twsPartHtml = windSpeedValueHtml(twsPart, d.twsMax);
+    const gustPartHtml = d.gust == null ? '—' : windSpeedValueHtml(gustPart, d.gust);
+    const tempOnly = d.tempMin != null && d.tempMax != null ? fmtRange(d.tempMin, d.tempMax, '°C') : '—';
+    const windText = `TWD <strong>${d.twdStr}</strong>${d.twdDeg == null ? '' : ` ${Math.round(d.twdDeg)}°`} · TWS ${twsPartHtml} · gusts ${gustPartHtml}`;
+    const skyText = d.sky && d.sky !== 'Variable' ? escapeHtml(d.sky) : '—';
+    const seaText = wavePart || '—';
+    const capeText = d.capeMax == null
+      ? '—'
+      : `<span class="cape-pill ${capeClass(d.capeMax)}">${Math.round(d.capeMax)} J/kg</span> ${capeLabel(d.capeMax)}`;
+    const rainText = d.rain == null ? '—' : fmtRain(d.rain, forecastMeta?.rainMode);
+    const uvText = d.uvMax == null ? '—' : `${Math.round(d.uvMax)} · ${uvLabel(d.uvMax)}`;
+
+    html += `<article class="${cls}">
+      <div class="pt-row">
+        <span class="pt-name">${p.name}</span>
+        <span class="pt-time">${fmt12(p.from)} – ${fmt12(p.to)}</span>
+      </div>
+      <div class="frow">${briefIcon('wind')}<span>${windText}</span></div>
+      <div class="frow">${briefIcon('gwd')}<span>${gwdPart}</span></div>
+      <div class="frow">${briefIcon('temp')}<span>${tempOnly}</span></div>
+      <div class="frow">${briefIcon('sky')}<span>${skyText}${fieldSourceTag('sky')}</span></div>
+      <div class="frow">${briefIcon('rain')}<span>Rain ${rainText}${fieldSourceTag('rain')}</span></div>
+      <div class="frow">${briefIcon('cape')}<span>CAPE ${capeText}${fieldSourceTag('cape')}</span></div>
+      <div class="frow">${briefIcon('uv')}<span>UV ${uvText}${fieldSourceTag('uv')}</span></div>
+      <div class="frow">${briefIcon('sea')}<span>${seaText}</span></div>
+    </article>`;
+  });
+
+  if(footer) html += `<footer class="f-footer">${escapeHtml(footer)}</footer>`;
+  document.getElementById('forecastDoc').innerHTML = html;
+  updateTeamBriefPreview();
+}
+
+function buildTeamBriefText(){
+  const vessel = document.getElementById('vesselName')?.value.trim() || 'Vessel';
+  const eventName = document.getElementById('eventName')?.value.trim() || '';
+  const raceDay = document.getElementById('raceDay')?.value.trim() || '';
+  const venue = document.getElementById('venueInput').value || 'Venue';
+  const dateVal = document.getElementById('fDate').value;
+  const model = document.getElementById('briefingModel').value;
+  const modelLabel = gribSourceLabel || openMeteoModelLabel(model) || 'Auto';
+  const title = [vessel, eventName, raceDay, venue].filter(Boolean).join(' · ');
+  const lines = [
+    title,
+    dateVal ? fmtDate(dateVal) : '',
+    modelLabel,
+    buildBriefSourceNote(),
+  ].filter(Boolean);
+
+  if(!forecastData){
+    lines.push('No forecast loaded yet.');
+    return lines.join('\n');
+  }
+
+  const trend = trendSummary(briefingTrendIndices());
+  lines.push(trendSummaryText(trend));
+
+  PERIODS.filter(p => activePeriods.has(p.id)).forEach(p => {
+    const d = sliceHours(p.from, p.to);
+    if(!d) return;
+    const twd = d.twdDeg == null ? 'TWD —' : `TWD ${d.twdStr} ${Math.round(d.twdDeg)}°`;
+    const tws = `TWS ${fmtRange(d.twsMin, d.twsMax, ' kt')}`;
+    const gust = d.gust == null ? 'gust —' : `gust ${Math.round(d.gust)} kt`;
+    const temp = d.tempMin != null && d.tempMax != null ? `temp ${fmtRange(d.tempMin, d.tempMax, '°C')}` : '';
+    const rain = d.rain == null ? '' : `rain ${fmtRain(d.rain, forecastMeta?.rainMode)}`;
+    const cape = d.capeMax == null ? '' : `CAPE ${Math.round(d.capeMax)} J/kg`;
+    const uv = d.uvMax == null ? '' : `UV ${Math.round(d.uvMax)}`;
+    const wave = d.waveH == null && d.waveDir == null
+      ? ''
+      : `Sig Wave ${d.waveH == null ? '—' : `${d.waveH.toFixed(1)} m`}${d.waveDir == null ? '' : ` · Wave Direction ${d.waveDirStr} ${Math.round(d.waveDir)}°`}`;
+    const sky = d.sky && d.sky !== 'Variable' ? d.sky : '';
+    lines.push(`${p.name} ${fmt12(p.from)}-${fmt12(p.to)}: ${[twd, tws, gust, temp, sky, rain, cape, uv, wave].filter(Boolean).join(' · ')}`);
+  });
+
+  return lines.join('\n');
+}
+
+function buildTeamBriefVisual(){
+  const vessel = document.getElementById('vesselName')?.value.trim() || 'Vessel';
+  const eventName = document.getElementById('eventName')?.value.trim() || '';
+  const raceDay = document.getElementById('raceDay')?.value.trim() || '';
+  const venue = document.getElementById('venueInput').value || 'Venue';
+  const dateVal = document.getElementById('fDate').value;
+  const model = document.getElementById('briefingModel').value;
+  const modelLabel = gribSourceLabel || openMeteoModelLabel(model) || 'Auto';
+  const sourceNote = buildBriefSourceNote() || (gribSourceLabel ? 'Squid GRIB' : 'Open-Meteo · Europe/Rome');
+  const lat = parseFloat(document.getElementById('latInput').value);
+  const lon = parseFloat(document.getElementById('lonInput').value);
+  const coordMeta = (!isNaN(lat) && !isNaN(lon))
+    ? `${Math.abs(lat).toFixed(3)}°${lat >= 0 ? 'N' : 'S'} ${Math.abs(lon).toFixed(3)}°${lon >= 0 ? 'E' : 'W'} · `
+    : '';
+
+  let html = forecastData
+    ? renderDailyOverview(modelLabel, sourceNote, coordMeta, venue, dateVal, '', vessel, eventName, raceDay)
+    : `<div class="f-header">
+    <div class="f-venue">${escapeHtml(vessel)}</div>
+    ${dateVal ? `<div class="f-date">${fmtDate(dateVal)}</div>` : ''}
+    <div class="f-meta">${[eventName, raceDay, venue, modelLabel].filter(Boolean).map(escapeHtml).join(' · ')}</div>
+  </div>`;
+
+  if(!forecastData){
+    return html + '<div class="empty" style="padding:var(--s4)">Load a forecast to generate team brief.</div>';
+  }
+
+  html += '<div class="team-period-grid">';
+  PERIODS.filter(p => activePeriods.has(p.id)).forEach((p, idx) => {
+    const d = sliceHours(p.from, p.to);
+    const cls = 'pcard c' + Math.min(idx, 5);
+    if(!d) return;
+    const twd = d.twdDeg == null ? 'TWD —' : `TWD <strong>${d.twdStr}</strong> ${Math.round(d.twdDeg)}°`;
+    const tws = `TWS ${windSpeedValueHtml(fmtRange(d.twsMin, d.twsMax, ' kt'), d.twsMax)}`;
+    const gust = d.gust == null ? 'gust —' : `gust ${windSpeedValueHtml(`${Math.round(d.gust)} kt`, d.gust)}`;
+    const temp = d.tempMin != null && d.tempMax != null ? fmtRange(d.tempMin, d.tempMax, '°C') : '—';
+    const sky = d.sky && d.sky !== 'Variable' ? escapeHtml(d.sky) : '—';
+    const rain = d.rain == null ? 'Rain —' : `Rain ${fmtRain(d.rain, forecastMeta?.rainMode)}`;
+    const cape = d.capeMax == null ? 'CAPE —' : `CAPE <span class="cape-pill ${capeClass(d.capeMax)}">${Math.round(d.capeMax)} J/kg</span>`;
+    const sea = d.waveH == null && d.waveDir == null
+      ? 'Sig Wave —'
+      : `Sig Wave <strong>${d.waveH == null ? '—' : `${d.waveH.toFixed(1)} m`}</strong>${d.waveDir == null ? '' : ` · Wave Direction <strong>${d.waveDirStr}</strong> ${Math.round(d.waveDir)}°`}`;
+    html += `<article class="${cls}">
+      <div class="pt-row"><span class="pt-name">${p.name}</span><span class="pt-time">${fmt12(p.from)} – ${fmt12(p.to)}</span></div>
+      <div class="frow">${briefIcon('wind')}<span>${twd} · ${tws} · ${gust}</span></div>
+      <div class="frow">${briefIcon('temp')}<span>${temp}</span></div>
+      <div class="frow">${briefIcon('sky')}<span>${sky}</span></div>
+      <div class="frow">${briefIcon('rain')}<span>${rain}</span></div>
+      <div class="frow">${briefIcon('cape')}<span>${cape}</span></div>
+      <div class="frow">${briefIcon('sea')}<span>${sea}</span></div>
+    </article>`;
+  });
+  html += '</div>';
+  return html;
+}
+
+function updateTeamBriefPreview(){
+  const textEl = document.getElementById('teamBriefText');
+  if(textEl && document.activeElement !== textEl) textEl.value = buildTeamBriefText();
+  const visualEl = document.getElementById('teamBriefVisual');
+  if(visualEl) visualEl.innerHTML = buildTeamBriefVisual();
+}
+
+async function copyTeamBrief(){
+  const text = document.getElementById('teamBriefText')?.value || buildTeamBriefText();
+  try {
+    await navigator.clipboard.writeText(text);
+    setStatus('green', 'Team brief copied to clipboard.');
+  } catch {
+    window.prompt('Copy team brief', text);
+    setStatus('yellow', 'Copy manually from the prompt.');
+  }
+}
+
+function exportTeamVisualBrief(){
+  const visual = buildTeamBriefVisual();
+  const style = document.querySelector('style')?.innerHTML || '';
+  const w = window.open('', '_blank', 'width=1200,height=850');
+  if(!w){
+    setStatus('red', 'Popup blocked. Allow popups to export visual brief.');
+    return;
+  }
+  w.document.write(`<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Team Weather Brief</title>
+<style>
+${style}
+@page{size:297mm 210mm;margin:5mm}
+html,body{background:#fff!important}
+body{display:block;height:auto;overflow:auto;padding:14px}
+.export-wrap{max-width:1000px;margin:0 auto;box-sizing:border-box;background:#fff;padding-right:2px}
+.export-wrap *{box-sizing:border-box}
+.export-wrap .team-brief-visual{width:100%;margin:0;gap:12px;background:#fff}
+.export-wrap .f-header,.export-wrap .pcard{width:100%}
+.export-wrap .daily-card{border:1px solid var(--primary);box-shadow:none}
+.export-wrap .daily-top{padding:18px 22px}
+.export-wrap .daily-title{font-size:2.15rem}
+.export-wrap .daily-context{font-size:.95rem;gap:10px}
+.export-wrap .daily-detail{padding:14px 18px}
+.export-wrap .daily-detail-row{font-size:13px}
+.export-wrap .metric{min-height:72px;padding:12px 14px;background:#fff}
+.export-wrap .metric-value{font-size:13px;line-height:1.25}
+.export-wrap .metric-detail{font-size:11px;line-height:1.2}
+.export-wrap .brief-item{padding:11px 14px;background:#fff}
+.export-wrap .brief-value{font-size:13px;line-height:1.25}
+.export-wrap .team-period-grid{gap:12px}
+.export-wrap .pcard{padding:12px 14px}
+.export-wrap .pt-row{margin-bottom:7px}
+.export-wrap .pt-name{font-size:1.05rem}
+.export-wrap .pt-time{font-size:11px}
+.export-wrap .frow{font-size:12px;line-height:1.22;padding:2px 0;gap:7px}
+.export-wrap .row-icon,.export-wrap .row-icon svg{width:15px;height:15px;flex-basis:15px}
+.export-actions{display:flex;gap:8px;margin-bottom:14px}
+.export-actions .btn{border:1px solid var(--border);background:var(--surface)}
+@media print{
+  html,body{background:#fff!important}
+  body{padding:0;overflow:hidden}
+  .export-actions{display:none!important}
+  .export-wrap{max-width:none;width:99%;padding:0 2px 0 0;background:#fff;transform:none}
+  .export-wrap .team-brief-visual{gap:9px}
+  .export-wrap .daily-top{padding:14px 18px}
+  .export-wrap .daily-title{font-size:1.95rem}
+  .export-wrap .daily-context{font-size:.88rem}
+  .export-wrap .daily-trend-list{margin-top:9px;gap:5px}
+  .export-wrap .daily-trend-row{font-size:12px}
+  .export-wrap .metric{min-height:60px;padding:10px 12px}
+  .export-wrap .metric-label,.export-wrap .brief-label{font-size:10px}
+  .export-wrap .metric-value,.export-wrap .brief-value{font-size:12px}
+  .export-wrap .metric-detail{font-size:10px}
+  .export-wrap .brief-item{padding:9px 12px}
+  .export-wrap .team-period-grid{gap:9px}
+  .export-wrap .pcard{padding:10px 12px}
+  .export-wrap .pt-row{margin-bottom:6px}
+  .export-wrap .pt-name{font-size:1rem}
+  .export-wrap .pt-time{font-size:10px}
+  .export-wrap .frow{font-size:11px;line-height:1.18;padding:2px 0}
+  .export-wrap .row-icon,.export-wrap .row-icon svg{width:14px;height:14px;flex-basis:14px}
+}
+</style>
+</head>
+<body>
+  <div class="export-wrap">
+    <div class="export-actions no-print">
+      <button class="btn" onclick="window.print()">Print / Save PDF</button>
+      <button class="btn" onclick="window.close()">Close</button>
+    </div>
+    <div class="team-brief-visual">${visual}</div>
+  </div>
+</body>
+</html>`);
+  w.document.close();
+  setStatus('green', 'Visual brief opened for export.');
+}
+
+function escapeHtml(s){
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+document.getElementById('fDate').value = new Date().toISOString().split('T')[0];
+['fDate','fNote','fFooter','venueInput','briefingModel','forecastSource','vesselName','eventName','raceDay'].forEach(id => {
+  document.getElementById(id).addEventListener('change', renderBrief);
+  document.getElementById(id).addEventListener('input', renderBrief);
+});
+
+document.addEventListener('click', e => {
+  const box = document.querySelector('.map-wrap');
+  if(box && !box.contains(e.target)) document.getElementById('searchResults').style.display = 'none';
+});
+
+buildPeriodList();
+populateBriefingModelSelect();
+ensureStorageVersion();
+refreshVenuePresetSelect('');
+refreshVesselPresetSelect('');
+refreshEventPresetSelect('');
+updateSaveVenueBtn();
+updateSaveVesselBtn();
+updateSaveEventBtn();
+initSidebar();
+initVenueMap();
+renderBrief();
+refreshSquidGribHint();
+handleSourceChange();
+handleComparisonSourceChange();
+</script>
+</body>
+</html>
