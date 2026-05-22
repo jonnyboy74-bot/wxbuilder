@@ -161,11 +161,11 @@ function initCrewBriefPage(){
   if(fDate && raceDate) fDate.value = raceDate;
   const periodSel = document.getElementById('comparePeriod');
   if(periodSel && snap.periodId) periodSel.value = snap.periodId;
-  const briefDoc = document.getElementById('forecastDoc');
-  if(briefDoc) briefDoc.innerHTML = TEAM_BRIEFING_HTML;
   applyComparisonPeriodFilter();
   const defaultTab = meta.briefingAvailable ? 'compare' : 'compare';
   switchMainTab(defaultTab);
+  const briefDoc = document.getElementById('forecastDoc');
+  if(briefDoc && typeof TEAM_BRIEFING_HTML === 'string') briefDoc.innerHTML = TEAM_BRIEFING_HTML;
   requestAnimationFrame(() => {
     renderComparison();
     updateComparisonStatusLine();
@@ -400,7 +400,9 @@ def render_team_brief_html(payload: dict, *, index_path: Path = INDEX_HTML) -> s
     )
     script = script.replace(
         "const TEAM_BRIEFING_HTML = __BRIEFING_HTML_JSON__;",
-        json.dumps(normalized["briefing_html"]),
+        "const TEAM_BRIEFING_HTML = "
+        + json.dumps(normalized["briefing_html"])
+        + ";",
     )
 
     template = TEMPLATE_HTML.read_text(encoding="utf-8")
@@ -434,6 +436,7 @@ def export_team_brief_from_request(body: bytes) -> dict:
     path = export_team_brief(payload)
     return {
         "ok": True,
+        "status": "ok",
         "path": path.name,
         "absolutePath": str(path),
         "bytes": path.stat().st_size,

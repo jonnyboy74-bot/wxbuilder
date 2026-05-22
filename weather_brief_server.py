@@ -67,13 +67,20 @@ def float_query(qs, name, default):
         raise ValueError(f"Invalid {name}: {raw}")
 
 
+EXPORT_TEAM_BRIEF_PATH = "/api/export-team-brief"
+SERVER_BUILD = "2026-05-22-export-team-brief"
+
+
 class WeatherBriefHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(LIFT_DIR), **kwargs)
 
     def log_message(self, fmt, *args):
-        if args and str(args[0]).startswith("GET /api/"):
+        if args and str(args[0]).startswith(("GET /api/", "POST /api/")):
             sys.stderr.write("%s - %s\n" % (self.address_string(), fmt % args))
+
+    def _api_path(self):
+        return urlparse(self.path).path.rstrip("/") or "/"
 
     def end_headers(self):
         self.send_header("Cache-Control", "no-store")
@@ -81,13 +88,15 @@ class WeatherBriefHandler(SimpleHTTPRequestHandler):
 
     def do_GET(self):
         parsed = urlparse(self.path)
-        if parsed.path == "/api/health":
+        path = parsed.path.rstrip("/") or "/"
+        if path == "/api/health":
             latest = latest_grib_status()
             gribs = grib_statuses()
             self._json(
                 200,
                 {
                     "ok": True,
+                    "serverBuild": SERVER_BUILD,
                     "dependencyOk": grib_io is not None,
                     "importError": str(GRIB_IMPORT_ERROR) if GRIB_IMPORT_ERROR else None,
                     "gribDir": str(GRIB_DIR),
@@ -95,11 +104,13 @@ class WeatherBriefHandler(SimpleHTTPRequestHandler):
                     "latestGrib": latest["name"] if latest else None,
                     "latest": latest,
                     "bundleEndpoint": "/api/squid-grib-bundle",
+                    "exportTeamBriefEndpoint": EXPORT_TEAM_BRIEF_PATH,
+                    "exportTeamBriefSupported": True,
                 },
             )
             return
 
-        if parsed.path == "/api/gribs":
+        if path == "/api/gribs":
             self._json(
                 200,
                 {
@@ -113,7 +124,7 @@ class WeatherBriefHandler(SimpleHTTPRequestHandler):
             )
             return
 
-        if parsed.path == "/api/squid-grib":
+        if path == "/api/squid-grib":
             if grib_io is None:
                 self._json(
                     503,
@@ -139,13 +150,13 @@ class WeatherBriefHandler(SimpleHTTPRequestHandler):
                 self._json(400, {"error": str(e)})
             return
 
-        if parsed.path == "/api/launch-expedition":
+        if path == "/api/launch-expedition":
             my_port = int(self.server.server_address[1])
             payload = launch_expedition_tool(skip_port=my_port)
             self._json(200 if payload.get("ok") else 404, payload)
             return
 
-        if parsed.path == "/api/expedition-health":
+        if path == "/api/expedition-health":
             my_port = int(self.server.server_address[1])
             port = find_expedition_port(skip_port=my_port)
             if port is None:
@@ -162,7 +173,7 @@ class WeatherBriefHandler(SimpleHTTPRequestHandler):
             )
             return
 
-        if parsed.path == "/api/open-meteo-marine":
+        if path == "/api/open-meteo-marine":
             qs = parse_qs(parsed.query)
             try:
                 lat = float_query(qs, "lat", "40.576")
@@ -185,7 +196,7 @@ class WeatherBriefHandler(SimpleHTTPRequestHandler):
                 self._json(502, {"error": str(e)})
             return
 
-        if parsed.path == "/api/squid-grib-bundle":
+        if path == "/api/squid-grib-bundle":
             if grib_io is None:
                 self._json(
                     503,
@@ -211,13 +222,13 @@ class WeatherBriefHandler(SimpleHTTPRequestHandler):
                 self._json(400, {"error": str(e)})
             return
 
-        if parsed.path in ("/", ""):
+        if path in ("/", ""):
             self.path = "/index.html"
         return super().do_GET()
 
     def do_POST(self):
-        parsed = urlparse(self.path)
-        if parsed.path == "/api/export-team-brief":
+        path = self._api_path()
+        if path == EXPORT_TEAM_BRIEF_PATH:
             try:
                 length = int(self.headers.get("Content-Length", "0"))
             except ValueError:
@@ -227,11 +238,20 @@ class WeatherBriefHandler(SimpleHTTPRequestHandler):
                 result = export_team_brief_from_request(body)
                 self._json(200, result)
             except TeamBriefExportError as e:
-                self._json(400, {"ok": False, "error": str(e)})
+                self._json(400, {"ok": False, "status": "error", "error": str(e)})
             except Exception as e:
-                self._json(500, {"ok": False, "error": str(e)})
+                self._json(500, {"ok": False, "status": "error", "error": str(e)})
             return
-        self._json(404, {"error": "Not found"})
+        self.send_error(404, "Not found")
+
+    def do_OPTIONS(self):
+        if self._api_path() == EXPORT_TEAM_BRIEF_PATH:
+            self.send_response(204)
+            self.send_header("Access-Control-Allow-Methods", "POST, OPTIONS")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type, Accept")
+            self.end_headers()
+            return
+        self.send_error(404)
 
     def _json(self, code, payload):
         body = json.dumps(payload).encode("utf-8")
@@ -248,6 +268,34 @@ def weather_brief_is_running(port):
             return json.loads(res.read()).get("ok") is True
     except Exception:
         return False
+
+
+def server_supports_export_team_brief(port):
+    try:
+        with urlopen(f"http://127.0.0.1:{port}/api/health", timeout=1) as res:
+            payload = json.loads(res.read())
+        return payload.get("exportTeamBriefSupported") is True
+    except Exception:
+        return False
+
+
+def stop_server_on_port(port):
+    """Stop any process listening on port (so restarts load fresh Python code)."""
+    try:
+        out = subprocess.check_output(
+            ["lsof", "-ti", f":{port}"],
+            stderr=subprocess.DEVNULL,
+            text=True,
+        ).strip()
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return False
+    if not out:
+        return False
+    for pid in out.split():
+        if pid.isdigit():
+            subprocess.run(["kill", "-9", pid], check=False)
+    time.sleep(0.25)
+    return True
 
 
 def open_weather_brief(port):
@@ -332,11 +380,30 @@ def launch_expedition_tool(skip_port: int | None = None) -> dict:
 
 
 def main():
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else PORT
+    argv = [a for a in sys.argv[1:] if a]
+    keep_existing = "--keep" in argv
+    argv = [a for a in argv if a != "--keep"]
+    port = PORT
+    for arg in argv:
+        if arg.isdigit():
+            port = int(arg)
+            break
     url = f"http://127.0.0.1:{port}/"
 
-    if weather_brief_is_running(port):
-        print(f"Weather Brief already running - opening {url}")
+    if not keep_existing:
+        if stop_server_on_port(port):
+            print(f"Stopped previous process on port {port}")
+
+    if keep_existing and weather_brief_is_running(port):
+        if server_supports_export_team_brief(port):
+            print(f"Weather Brief already running - opening {url}")
+            open_weather_brief(port)
+            return
+        print(
+            f"Weather Brief on port {port} is an older build without Export Team Brief.\n"
+            f"Quit and run Start Weather Brief.command again (without --keep).",
+            file=sys.stderr,
+        )
         open_weather_brief(port)
         return
 
@@ -345,19 +412,21 @@ def main():
     except OSError as e:
         if e.errno != errno.EADDRINUSE:
             raise
-        if weather_brief_is_running(port):
-            print(f"Weather Brief already running - opening {url}")
-            open_weather_brief(port)
-            return
-        print(
-            f"Port {port} is in use by another program.\n"
-            f"Close it, or start Weather Brief on another port:\n"
-            f"  python3 weather_brief_server.py 8766",
-            file=sys.stderr,
-        )
-        sys.exit(1)
+        stop_server_on_port(port)
+        time.sleep(0.3)
+        try:
+            server = ThreadingHTTPServer(("127.0.0.1", port), WeatherBriefHandler)
+        except OSError:
+            print(
+                f"Port {port} is in use by another program.\n"
+                f"Close it, or start Weather Brief on another port:\n"
+                f"  python3 weather_brief_server.py 8766",
+                file=sys.stderr,
+            )
+            sys.exit(1)
 
     print(f"Weather Brief: {url}")
+    print(f"Export Team Brief: POST {EXPORT_TEAM_BRIEF_PATH}")
     print(f"Squid GRIB folder: {GRIB_DIR}")
     if GRIB_IMPORT_ERROR:
         print("GRIB tools unavailable.")

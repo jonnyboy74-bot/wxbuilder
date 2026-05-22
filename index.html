@@ -6576,11 +6576,23 @@ function collectTeamBriefExportPayload(){
   };
 }
 
+async function ensureExportTeamBriefServer(){
+  const res = await fetch('/api/health', { headers: { Accept: 'application/json' } });
+  const health = await readApiJson(res, 'Server health');
+  if(!health.exportTeamBriefSupported){
+    throw new Error(
+      'Weather Brief server is outdated (no Export Team Brief). Quit the app, run Start Weather Brief.command again, then reload this page.'
+    );
+  }
+  return health;
+}
+
 async function exportTeamBriefFile(){
   const btn = document.getElementById('teamBriefFileBtn');
   try {
     if(btn) btn.disabled = true;
     setStatus('yellow', 'Exporting team brief…');
+    await ensureExportTeamBriefServer();
     const payload = collectTeamBriefExportPayload();
     const res = await fetch('/api/export-team-brief', {
       method: 'POST',
@@ -6588,6 +6600,9 @@ async function exportTeamBriefFile(){
       body: JSON.stringify(payload),
     });
     const data = await readApiJson(res, 'Export team brief');
+    if(data.status !== 'ok' && !data.ok){
+      throw new Error(data.error || 'Export team brief failed');
+    }
     const label = data.path || 'team_brief.html';
     setStatus('green', `Team brief written to ${label} (${Math.round((data.bytes || 0) / 1024)} KB).`);
   } catch(e){
