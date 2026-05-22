@@ -782,6 +782,7 @@ aside::-webkit-scrollbar-thumb{background:var(--motion);border-radius:4px}
     <button id="supplementOmBtn" type="button" class="btn btn-ghost" style="width:100%;font-size:var(--xs);margin-top:var(--s2);display:none" onclick="supplementForecastFromOpenMeteo()">Supplement CAPE/rain/wave (Open-Meteo)</button>
     <button id="teamCopyBtn" type="button" class="btn btn-ghost" style="width:100%;font-size:var(--xs);margin-top:var(--s2)" onclick="copyTeamBrief()">Copy team brief</button>
     <button id="teamExportBtn" type="button" class="btn btn-ghost" style="width:100%;font-size:var(--xs);margin-top:var(--s2)" onclick="exportTeamVisualBrief()">Export visual brief</button>
+    <button id="teamBriefFileBtn" type="button" class="btn btn-ghost" style="width:100%;font-size:var(--xs);margin-top:var(--s2)" onclick="exportTeamBriefFile()">Export Team Brief</button>
     <label class="export-include-compare" style="display:flex;align-items:flex-start;gap:var(--s2);font-size:var(--xs);color:var(--muted);margin-top:var(--s2);line-height:1.4;cursor:pointer">
       <input type="checkbox" id="exportIncludeCompare" style="margin-top:2px" disabled>
       <span>Include model comparison on pages 2–3 (timeline + charts, then agreement — no Live Data)</span>
@@ -6530,6 +6531,69 @@ async function copyTeamBrief(){
   } catch {
     window.prompt('Copy team brief', text);
     setStatus('yellow', 'Copy manually from the prompt.');
+  }
+}
+
+function collectTeamBriefExportPayload(){
+  renderBrief();
+  const briefingHtml = document.getElementById('forecastDoc')?.innerHTML || '';
+  const briefingAvailable = !!(
+    forecastData &&
+    briefingHtml.trim() &&
+    !/>\s*Set venue and date/i.test(briefingHtml)
+  );
+  const compareLoaded = Object.values(comparisonData).filter(m => m && !m.error).length;
+  if(!compareLoaded){
+    throw new Error('Load model comparison before exporting team brief.');
+  }
+  return {
+    exportedAt: new Date().toISOString(),
+    briefingHtml,
+    briefingAvailable,
+    gribSourceLabel: gribSourceLabel || '',
+    compare: {
+      raw: comparisonDataRaw,
+      configs: comparisonConfigs,
+      skipped: comparisonSkippedGribs,
+      fetchSite: comparisonFetchSite,
+      date: getComparisonDate(),
+      periodId: getComparePeriodId(),
+      issuedAt: comparisonIssuedAt,
+      timelineBaseDate: comparisonTimelineBaseDate,
+    },
+    form: {
+      lat: parseFloat(document.getElementById('latInput')?.value) || null,
+      lon: parseFloat(document.getElementById('lonInput')?.value) || null,
+      fDate: document.getElementById('fDate')?.value || '',
+      compareDate: document.getElementById('compareDate')?.value || getComparisonDate(),
+      venue: document.getElementById('venueInput')?.value || '',
+      vessel: document.getElementById('vesselName')?.value?.trim() || '',
+      event: document.getElementById('eventName')?.value?.trim() || '',
+      raceDay: document.getElementById('raceDay')?.value?.trim() || '',
+      fNote: document.getElementById('fNote')?.value || '',
+      fFooter: document.getElementById('fFooter')?.value || '',
+    },
+  };
+}
+
+async function exportTeamBriefFile(){
+  const btn = document.getElementById('teamBriefFileBtn');
+  try {
+    if(btn) btn.disabled = true;
+    setStatus('yellow', 'Exporting team brief…');
+    const payload = collectTeamBriefExportPayload();
+    const res = await fetch('/api/export-team-brief', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await readApiJson(res, 'Export team brief');
+    const label = data.path || 'team_brief.html';
+    setStatus('green', `Team brief written to ${label} (${Math.round((data.bytes || 0) / 1024)} KB).`);
+  } catch(e){
+    setStatus('red', e?.message || String(e));
+  } finally {
+    if(btn) btn.disabled = false;
   }
 }
 

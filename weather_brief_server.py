@@ -13,6 +13,8 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 from urllib.request import urlopen
 
+from export_team_brief import TeamBriefExportError, export_team_brief_from_request
+
 LIFT_DIR = Path(__file__).resolve().parent
 GRIB_DIR = LIFT_DIR / "Squid Gribs"
 PORT = 8765
@@ -212,6 +214,24 @@ class WeatherBriefHandler(SimpleHTTPRequestHandler):
         if parsed.path in ("/", ""):
             self.path = "/index.html"
         return super().do_GET()
+
+    def do_POST(self):
+        parsed = urlparse(self.path)
+        if parsed.path == "/api/export-team-brief":
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+            except ValueError:
+                length = 0
+            body = self.rfile.read(length) if length > 0 else b""
+            try:
+                result = export_team_brief_from_request(body)
+                self._json(200, result)
+            except TeamBriefExportError as e:
+                self._json(400, {"ok": False, "error": str(e)})
+            except Exception as e:
+                self._json(500, {"ok": False, "error": str(e)})
+            return
+        self._json(404, {"error": "Not found"})
 
     def _json(self, code, payload):
         body = json.dumps(payload).encode("utf-8")
