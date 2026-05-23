@@ -21,7 +21,7 @@ body.team-brief-page{
 body.team-brief-page .app-body{grid-template-columns:1fr}
 body.team-brief-page .preview-area{align-items:stretch}
 body.team-brief-page .compare-panel,
-body.team-brief-page .forecast-doc{max-width:none}
+body.team-brief-page .forecast-doc{max-width:min(100%,900px)}
 body.team-brief-page .crew-snapshot-note{
   font-size:var(--xs);color:var(--muted);margin-left:auto;
 }
