@@ -19,7 +19,7 @@ body.team-brief-page{
   display:grid;grid-template-columns:1fr;grid-template-rows:auto 1fr;
 }
 body.team-brief-page .app-body{grid-template-columns:1fr}
-body.team-brief-page .preview-area{align-items:stretch}
+body.team-brief-page .preview-area{align-items:flex-start}
 body.team-brief-page .compare-panel,
 body.team-brief-page .forecast-doc{max-width:min(100%,900px)}
 body.team-brief-page .crew-snapshot-note{
