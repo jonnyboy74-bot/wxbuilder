@@ -12,7 +12,7 @@
     "refDate": "20260523",
     "refTime": "0000",
     "modelLabel": "ARPEGE (Squid GRIB)",
-    "extracted": "2026-05-23T05:54:10.402988+00:00",
+    "extracted": "2026-05-23T11:09:02.577284+00:00",
     "availableFields": [
       "TWS",
       "TWD",
