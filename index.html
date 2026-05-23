@@ -4022,7 +4022,13 @@ function comparisonDisplayHours(){
   const preset = getComparePeriodPreset();
   if(preset.allHours){
     const date = getComparisonDate();
-    const fromDate = comparisonHours().filter(h => typeof h !== 'string' || !h.includes('T') || h.slice(0,10) >= date);
+    let fromDate = comparisonHours().filter(h => typeof h !== 'string' || !h.includes('T') || h.slice(0,10) >= date);
+    if(typeof TEAM_BRIEF_MODE === 'undefined' || !TEAM_BRIEF_MODE){
+      const nowBucketMs = Math.floor(Date.now() / 3600000) * 3600000 + COMPARE_LOCAL_OFFSET_H * 3600000;
+      const nb = new Date(nowBucketMs);
+      const nowIso = `${nb.getUTCFullYear()}-${String(nb.getUTCMonth()+1).padStart(2,'0')}-${String(nb.getUTCDate()).padStart(2,'0')}T${String(nb.getUTCHours()).padStart(2,'0')}:00`;
+      fromDate = fromDate.filter(h => typeof h !== 'string' || !h.includes('T') || h >= nowIso);
+    }
     return _pubCutHours(fromDate);
   }
   const hours = comparisonHours();
@@ -4737,7 +4743,13 @@ function compareTableRowHtml(entry, hours, metric, view, refEntry, index){
       return;
     }
     const cellHtml = compareTableCellHtml(metric, value, { view, refValue });
-    cells += dayBorderStyle ? cellHtml.replace('<td', `<td${dayBorderStyle}`) : cellHtml;
+    if(dayBorderStyle){
+      cells += cellHtml.includes(' style="')
+        ? cellHtml.replace(' style="', ' style="border-left:2px solid #cbd5e1;')
+        : cellHtml.replace('<td', '<td style="border-left:2px solid #cbd5e1"');
+    } else {
+      cells += cellHtml;
+    }
   });
   const rowCls = isRef && view === 'delta' ? 'compare-table-ref' : '';
   return `<tr class="${rowCls}">${cells}</tr>`;
