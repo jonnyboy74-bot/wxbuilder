@@ -4829,6 +4829,7 @@ function renderComparisonHourlyTable(){
   hours.forEach(h => {
     const th = document.createElement('th');
     th.textContent = compareChartHourLabel(h);
+    th.dataset.hour = h;
     if(isAllHours && typeof h === 'string' && h.includes('T')){
       const day = h.slice(0, 10);
       if(prevDay && day !== prevDay) th.style.borderLeft = '2px solid #cbd5e1';
@@ -4868,16 +4869,6 @@ function highlightComparisonTableHour(hour){
     const tds = row.querySelectorAll('td');
     if(tds[idx + 1]) tds[idx + 1].classList.add('compare-td-hour-selected');
   });
-  if(targetTh){
-    const wrap = document.querySelector('.compare-table-wrap');
-    if(wrap){
-      const thLeft = targetTh.offsetLeft;
-      const thWidth = targetTh.offsetWidth;
-      const wrapWidth = wrap.clientWidth;
-      const scrollTarget = thLeft - (wrapWidth / 2) + (thWidth / 2);
-      wrap.scrollTo({ left: Math.max(0, scrollTarget), behavior: 'smooth' });
-    }
-  }
 }
 
 function renderComparisonCards(){
@@ -4984,21 +4975,29 @@ function compareChartHours(){
 }
 
 function syncChartToTableScroll(){
-  if(!getComparePeriodPreset().allHours) return;
   const wrap = document.querySelector('.compare-table-wrap');
   if(!wrap) return;
-  const MODEL_COL_W = 130;
-  const HOUR_COL_W = 62;
+  const modelTh = document.querySelector('#compareTableHead th:nth-child(1)');
+  const MODEL_W = modelTh ? modelTh.offsetWidth : 0;
   const scrollLeft = wrap.scrollLeft;
-  const clientWidth = wrap.clientWidth;
+  const scrollRight = scrollLeft + wrap.clientWidth;
+  const visibleHours = [];
+  document.querySelectorAll('#compareTableHead th[data-hour]').forEach(th => {
+    const left = th.offsetLeft;
+    const right = left + th.offsetWidth;
+    if(right > scrollLeft + MODEL_W && left < scrollRight){
+      visibleHours.push(th.dataset.hour);
+    }
+  });
+  if(!visibleHours.length) return;
   const allHours = comparisonDisplayHours();
-  if(!allHours.length) return;
-  const startIdx = Math.max(0, Math.floor((scrollLeft) / HOUR_COL_W) - 1);
-  const visibleCount = Math.ceil((clientWidth - MODEL_COL_W) / HOUR_COL_W);
-  const endIdx = Math.min(allHours.length, startIdx + visibleCount + 3);
-  const windowHours = allHours.slice(startIdx, endIdx);
-  if(!windowHours.length) return;
-  comparisonChartWindowHours = windowHours;
+  const typed = visibleHours.map(h => {
+    const n = Number(h);
+    return isNaN(n) ? h : n;
+  });
+  const slice = allHours.filter(h => typed.some(v => v === h || Number(v) === Number(h)));
+  if(!slice.length) return;
+  comparisonChartWindowHours = slice;
   updateComparisonMainChart();
 }
 
@@ -5178,13 +5177,10 @@ function renderComparison(){
   highlightComparisonTableHour(comparisonSelectedHour);
   renderSkippedGribs();
   renderComparisonAgreement();
-  if(getComparePeriodPreset().allHours && !comparisonChartWindowHours){
-    const allH = comparisonDisplayHours();
-    comparisonChartWindowHours = allH.slice(0, Math.min(24, allH.length));
-  }
+  attachCompareTableScrollListener();
+  syncChartToTableScroll();
   renderComparisonCharts();
   setupComparisonChartResize();
-  attachCompareTableScrollListener();
   updateComparisonStatusLine();
   updateExportCompareOption();
 }

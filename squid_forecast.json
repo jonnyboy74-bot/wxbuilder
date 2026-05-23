@@ -12,7 +12,7 @@
     "refDate": "20260522",
     "refTime": "1800",
     "modelLabel": "LaMMA 1 km (Squid GRIB)",
-    "extracted": "2026-05-23T13:49:29.492275+00:00",
+    "extracted": "2026-05-23T14:55:58.061924+00:00",
     "availableFields": [
       "TWS",
       "TWD",
