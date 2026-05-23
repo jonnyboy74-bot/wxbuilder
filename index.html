@@ -4009,9 +4009,13 @@ function comparisonHours(entries = comparisonLoadedEntries()){
 
 function _pubCutHours(hours){
   if(typeof TEAM_BRIEF_MODE === 'undefined' || !TEAM_BRIEF_MODE) return hours;
-  const cutMs = typeof TEAM_EXPORT_META !== 'undefined' ? +(new Date(TEAM_EXPORT_META?.exportedAt || 0)) : 0;
-  if(!(cutMs > 0)) return hours;
-  return hours.filter(h => typeof h !== 'string' || !h.includes('T') || +(new Date(h)) >= cutMs);
+  const expMs = typeof TEAM_EXPORT_META !== 'undefined' ? +(new Date(TEAM_EXPORT_META?.exportedAt || 0)) : 0;
+  if(!(expMs > 0)) return hours;
+  // Floor to the containing UTC hour, then shift by the same fixed local offset used in gribStepToLocalIso
+  const bucketMs = Math.floor(expMs / 3600000) * 3600000 + COMPARE_LOCAL_OFFSET_H * 3600000;
+  const dt = new Date(bucketMs);
+  const cutIso = `${dt.getUTCFullYear()}-${String(dt.getUTCMonth()+1).padStart(2,'0')}-${String(dt.getUTCDate()).padStart(2,'0')}T${String(dt.getUTCHours()).padStart(2,'0')}:00`;
+  return hours.filter(h => typeof h !== 'string' || !h.includes('T') || h >= cutIso);
 }
 
 function comparisonDisplayHours(){
