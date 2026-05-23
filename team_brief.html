@@ -734,13 +734,13 @@ body.team-brief-page .crew-snapshot-note{
 </main>
 </div>
 <div hidden aria-hidden="true" id="crewFormStubs">
-  <input id="latInput" type="hidden" value="40.656">
-  <input id="lonInput" type="hidden" value="14.338">
+  <input id="latInput" type="hidden" value="40.626">
+  <input id="lonInput" type="hidden" value="14.376">
   <input id="fDate" type="hidden" value="2026-05-23">
   <input id="compareDate" type="hidden" value="2026-05-23">
-  <input id="venueInput" type="hidden" value="Start Area">
-  <input id="vesselName" type="hidden" value="Layla GB72">
-  <input id="eventName" type="hidden" value="IMA Tre Golfi 2026">
+  <input id="venueInput" type="hidden" value="">
+  <input id="vesselName" type="hidden" value="">
+  <input id="eventName" type="hidden" value="">
   <input id="raceDay" type="hidden" value="">
   <input id="fNote" type="hidden" value="">
   <input id="fFooter" type="hidden" value="">
@@ -3816,14 +3816,21 @@ function comparisonHours(entries = comparisonLoadedEntries()){
   });
 }
 
+function _pubCutHours(hours){
+  if(typeof TEAM_BRIEF_MODE === 'undefined' || !TEAM_BRIEF_MODE) return hours;
+  const cutMs = typeof TEAM_EXPORT_META !== 'undefined' ? +(new Date(TEAM_EXPORT_META?.exportedAt || 0)) : 0;
+  if(!(cutMs > 0)) return hours;
+  return hours.filter(h => typeof h !== 'string' || !h.includes('T') || +(new Date(h)) >= cutMs);
+}
+
 function comparisonDisplayHours(){
   const preset = getComparePeriodPreset();
   if(preset.allHours){
-    return comparisonHours();
+    return _pubCutHours(comparisonHours());
   }
   const hours = comparisonHours();
   if(hours.length > 0 && typeof hours[0] === 'string'){
-    return hours;
+    return _pubCutHours(hours);
   }
   const DISPLAY_MIN = 6;
   const DISPLAY_MAX = 18;
@@ -6886,10 +6893,10 @@ function initCrewBriefPage(){
   if(compareDate && raceDate) compareDate.value = raceDate;
   if(fDate && raceDate) fDate.value = raceDate;
   const periodSel = document.getElementById('comparePeriod');
-  if(periodSel && snap.periodId) periodSel.value = snap.periodId;
-  applyComparisonPeriodFilter();
   const defaultTab = meta.briefingAvailable ? 'compare' : 'compare';
   switchMainTab(defaultTab);
+  if(periodSel && snap.periodId) periodSel.value = snap.periodId;
+  applyComparisonPeriodFilter();
   const briefDoc = document.getElementById('forecastDoc');
   if(briefDoc && typeof TEAM_BRIEFING_HTML === 'string') briefDoc.innerHTML = TEAM_BRIEFING_HTML;
   requestAnimationFrame(() => {

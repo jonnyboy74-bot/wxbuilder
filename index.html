@@ -4007,14 +4007,21 @@ function comparisonHours(entries = comparisonLoadedEntries()){
   });
 }
 
+function _pubCutHours(hours){
+  if(typeof TEAM_BRIEF_MODE === 'undefined' || !TEAM_BRIEF_MODE) return hours;
+  const cutMs = typeof TEAM_EXPORT_META !== 'undefined' ? +(new Date(TEAM_EXPORT_META?.exportedAt || 0)) : 0;
+  if(!(cutMs > 0)) return hours;
+  return hours.filter(h => typeof h !== 'string' || !h.includes('T') || +(new Date(h)) >= cutMs);
+}
+
 function comparisonDisplayHours(){
   const preset = getComparePeriodPreset();
   if(preset.allHours){
-    return comparisonHours();
+    return _pubCutHours(comparisonHours());
   }
   const hours = comparisonHours();
   if(hours.length > 0 && typeof hours[0] === 'string'){
-    return hours;
+    return _pubCutHours(hours);
   }
   const DISPLAY_MIN = 6;
   const DISPLAY_MAX = 18;
