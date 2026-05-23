@@ -284,14 +284,15 @@ aside::-webkit-scrollbar-thumb{background:var(--motion);border-radius:4px}
 .compare-mtab:hover,.compare-vtab:hover{border-color:#b0bcf0}
 .compare-table-outer{display:flex;flex-direction:column;gap:10px;width:100%;min-width:0;padding:0}
 .compare-table-wrap{
-  border:1px solid #d9dfec;border-radius:18px;overflow:hidden;background:#fff;max-width:100%;
+  border:1px solid #d9dfec;border-radius:18px;overflow-x:auto;overflow-y:visible;background:#fff;max-width:100%;
 }
-.compare-table{width:100%;border-collapse:collapse;min-width:920px;font-family:inherit}
+.compare-table{border-collapse:collapse;min-width:max-content;font-family:inherit;table-layout:fixed}
 .compare-table thead th{
   background:#f8f9fd;font-size:11px;color:#6b7685;text-transform:uppercase;letter-spacing:.06em;
   padding:11px 10px;border-bottom:1px solid #d9dfec;text-align:center;white-space:nowrap;font-weight:600;
+  min-width:60px;width:60px;
 }
-.compare-table thead th.compare-th-model{text-align:left}
+.compare-table thead th.compare-th-model{text-align:left;min-width:130px;width:130px;position:sticky;left:0;z-index:2;background:#f8f9fd}
 .compare-table thead th.compare-th-hour-selected,
 .compare-table .compare-td-hour-selected{box-shadow:none;font-weight:inherit;color:inherit}
 .compare-td-ref-anchor{background:#f0f4ff;color:#2d63ff;font-weight:700}
@@ -820,6 +821,7 @@ aside::-webkit-scrollbar-thumb{background:var(--motion);border-radius:4px}
           <option value="fullday">Full day · 06:00–18:00</option>
           <option value="h12">12 hours</option>
           <option value="h24">24 hours</option>
+          <option value="allhours">Full range (all hours)</option>
         </select>
       </div>
       <div class="fg compare-source">
@@ -1356,6 +1358,7 @@ const COMPARE_PERIOD_PRESETS = {
   fullday: { id:'fullday', label:'Full day · 06:00–18:00', from:6, to:18, span:null },
   h12: { id:'h12', label:'12 hours', from:null, to:null, span:12 },
   h24: { id:'h24', label:'24 hours', from:null, to:null, span:24 },
+  allhours: { id:'allhours', label:'Full range (all hours)', from:null, to:null, span:null, allHours:true },
 };
 const COMPARE_DAY_LABELS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
@@ -1372,6 +1375,8 @@ let comparisonChartResizeObserver = null;
 let comparisonTableMetric = 'tws';
 let comparisonTableView = 'real';
 let comparisonMainChart = null;
+let comparisonChartWindowHours = null;
+let compareScrollDebounce = null;
 let gribSourceLabel = null;
 let forecastMeta = null;
 let briefingLammaCache = null;
@@ -2363,6 +2368,7 @@ function clearComparisonData(){
   comparisonIssuedAt = null;
   comparisonFetchSite = null;
   comparisonSelectedHour = null;
+  comparisonChartWindowHours = null;
   updateCompareIssued();
   updateExportCompareOption();
 }
@@ -2826,6 +2832,30 @@ function filterModelByComparePeriod(model){
   if(!model || model.error || !Array.isArray(model.hours) || !model.hours.length) return model;
   const targetDate = getComparisonDate();
   const preset = getComparePeriodPreset();
+
+  if(preset.allHours){
+    const seenIso = new Set();
+    const entries = model.hours
+      .map((_, i) => ({ i, iso: comparePointIso(model, i) }))
+      .filter(entry => {
+        if(!entry.iso || seenIso.has(entry.iso)) return false;
+        seenIso.add(entry.iso);
+        return true;
+      })
+      .sort((a, b) => String(a.iso).localeCompare(String(b.iso)));
+    if(!entries.length) return { ...model, error: 'No data in GRIB file.' };
+    const idxs = entries.map(entry => entry.i);
+    const pick = key => Array.isArray(model[key]) ? idxs.map(i => model[key][i] ?? null) : idxs.map(() => null);
+    return {
+      ...model,
+      hours: entries.map(entry => entry.iso),
+      times: entries.map(entry => entry.iso),
+      tws: pick('tws'), twd: pick('twd'), gust: pick('gust'),
+      temp: pick('temp'), wmo: pick('wmo'), cape: pick('cape'),
+      rain: pick('rain'), wave: pick('wave'), waveDir: pick('waveDir'),
+    };
+  }
+
   let entries = model.hours
     .map((_, i) => ({ i, iso: comparePointIso(model, i) }))
     .filter(entry => entry.iso && isoDatePart(entry.iso) === targetDate);
@@ -2881,6 +2911,7 @@ function handleComparisonPeriodChange(){
     localStorage.setItem(COMPARE_PERIOD_KEY, getComparePeriodId());
   } catch {}
   comparisonSelectedHour = null;
+  comparisonChartWindowHours = null;
   if(Object.keys(comparisonDataRaw).length){
     applyComparisonPeriodFilter();
     renderComparison();
@@ -2898,6 +2929,7 @@ function comparisonStatusHint(source = selectedComparisonSource()){
 
 function handleComparisonDateChange(){
   comparisonSelectedHour = null;
+  comparisonChartWindowHours = null;
   comparisonTimelineBaseDate = getComparisonDate();
   if(Object.keys(comparisonDataRaw).length){
     applyComparisonPeriodFilter();
@@ -3965,15 +3997,23 @@ function comparisonHours(entries = comparisonLoadedEntries()){
     model.hours.forEach(h => {
       const n = Number(h);
       if(!isNaN(n)) hours.add(n);
+      else if(typeof h === 'string' && h.length > 0) hours.add(h);
     });
   });
-  return Array.from(hours).sort((a, b) => a - b);
+  const arr = Array.from(hours);
+  return arr.sort((a, b) => {
+    if(typeof a === 'string' && typeof b === 'string') return a.localeCompare(b);
+    return Number(a) - Number(b);
+  });
 }
 
 function comparisonDisplayHours(){
+  const preset = getComparePeriodPreset();
+  if(preset.allHours){
+    return comparisonHours();
+  }
   const DISPLAY_MIN = 6;
   const DISPLAY_MAX = 18;
-  const preset = getComparePeriodPreset();
   let from = DISPLAY_MIN;
   let to = DISPLAY_MAX;
   if(preset.from != null && preset.to != null){
@@ -3988,7 +4028,11 @@ function comparisonDisplayHours(){
 
 function nearestComparisonHour(hour, hours = comparisonHours()){
   if(!hours.length) return null;
-  if(hour == null || isNaN(hour)) return hours[0];
+  if(hour == null) return hours[0];
+  if(typeof hours[0] === 'string'){
+    return hours.includes(hour) ? hour : hours[0];
+  }
+  if(isNaN(Number(hour))) return hours[0];
   return hours.reduce((best, h) => Math.abs(h - hour) < Math.abs(best - hour) ? h : best, hours[0]);
 }
 
@@ -4013,6 +4057,19 @@ function compareTimelineRangeText(hours = comparisonHours()){
 }
 
 function compareChartHourLabel(hour){
+  if(typeof hour === 'string' && hour.includes('T')){
+    // ISO strings are local time without timezone suffix, e.g. "2026-05-23T22:00"
+    // Parse directly from string to avoid timezone-shifting by new Date()
+    const datePart = hour.slice(0, 10);
+    const hourPart = hour.slice(11, 13);
+    if(datePart && hourPart){
+      const d = new Date(datePart + 'T12:00:00Z');
+      if(!isNaN(d.getTime())){
+        const dow = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getUTCDay()];
+        return `${dow} ${hourPart}:00`;
+      }
+    }
+  }
   const clock = compareClockHour(hour);
   return clock == null ? '--' : `${String(clock).padStart(2, '0')}:00`;
 }
@@ -4123,7 +4180,8 @@ function renderComparisonHourControl(){
   const row = document.getElementById('compareHourRow');
   if(!row) return;
   const hours = comparisonHours();
-  if(!hours.length){
+  const preset = getComparePeriodPreset();
+  if(!hours.length || preset.allHours){
     row.style.display = 'none';
     row.innerHTML = '';
     return;
@@ -4141,7 +4199,9 @@ function renderComparisonHourControl(){
 
 function compareHourData(model, hour = comparisonSelectedHour){
   if(!model || model.error || !Array.isArray(model.hours) || hour == null) return null;
-  const idx = model.hours.findIndex(h => Number(h) === Number(hour));
+  const idx = model.hours.findIndex(h =>
+    (typeof h === 'string' && h === hour) || Number(h) === Number(hour)
+  );
   if(idx < 0) return null;
   return {
     tws: validNumber(model.tws?.[idx]),
@@ -4644,15 +4704,23 @@ function compareTableRowHtml(entry, hours, metric, view, refEntry, index){
     <div class="compare-model-cell"><span class="compare-model-swatch" style="background:${col}"></span>${escapeHtml(compareDisplayLabel(cfg, model))}</div>
   </td>`;
   const rawModel = comparisonDataRaw[cfg?.id];
+  let bodyPrevDay = null;
   hours.forEach((hour, i) => {
     const value = compareTableMetricValue(model, hour, metric, rawModel);
     const refValue = view === 'delta' ? refValues[i] : null;
+    let dayBorderStyle = '';
+    if(typeof hour === 'string' && hour.includes('T')){
+      const day = hour.slice(0, 10);
+      if(bodyPrevDay && day !== bodyPrevDay) dayBorderStyle = ' style="border-left:2px solid #cbd5e1"';
+      bodyPrevDay = day;
+    }
     if(view === 'delta' && isRef){
       const realVal = compareTableFormatReal(metric, value);
-      cells += `<td class="compare-td-ref-anchor"><span class="compare-table-val">${escapeHtml(realVal)}</span></td>`;
+      cells += `<td class="compare-td-ref-anchor"${dayBorderStyle}><span class="compare-table-val">${escapeHtml(realVal)}</span></td>`;
       return;
     }
-    cells += compareTableCellHtml(metric, value, { view, refValue });
+    const cellHtml = compareTableCellHtml(metric, value, { view, refValue });
+    cells += dayBorderStyle ? cellHtml.replace('<td', `<td${dayBorderStyle}`) : cellHtml;
   });
   const rowCls = isRef && view === 'delta' ? 'compare-table-ref' : '';
   return `<tr class="${rowCls}">${cells}</tr>`;
@@ -4744,6 +4812,7 @@ function renderComparisonHourlyTable(){
   const hours = comparisonDisplayHours();
   const metric = comparisonTableMetric;
   const view = comparisonTableView;
+  const isAllHours = getComparePeriodPreset().allHours;
   if(!entries.length || !hours.length){
     head.innerHTML = '';
     body.innerHTML = '<tr><td class="compare-period-sub">No hourly comparison data.</td></tr>';
@@ -4756,9 +4825,15 @@ function renderComparisonHourlyTable(){
   modelTh.className = 'compare-th-model';
   modelTh.textContent = 'Model';
   headerRow.appendChild(modelTh);
+  let prevDay = null;
   hours.forEach(h => {
     const th = document.createElement('th');
     th.textContent = compareChartHourLabel(h);
+    if(isAllHours && typeof h === 'string' && h.includes('T')){
+      const day = h.slice(0, 10);
+      if(prevDay && day !== prevDay) th.style.borderLeft = '2px solid #cbd5e1';
+      prevDay = day;
+    }
     headerRow.appendChild(th);
   });
   head.replaceChildren(headerRow);
@@ -4782,14 +4857,27 @@ function highlightComparisonTableHour(hour){
   head.querySelectorAll('.compare-th-hour-selected').forEach(el => el.classList.remove('compare-th-hour-selected'));
   if(hour == null) return;
   const hours = comparisonDisplayHours();
-  const idx = hours.findIndex(h => Number(h) === Number(hour));
+  const idx = hours.findIndex(h =>
+    (typeof h === 'string' && h === hour) || Number(h) === Number(hour)
+  );
   if(idx < 0) return;
   const ths = head.querySelectorAll('th');
-  if(ths[idx + 1]) ths[idx + 1].classList.add('compare-th-hour-selected');
+  const targetTh = ths[idx + 1];
+  if(targetTh) targetTh.classList.add('compare-th-hour-selected');
   body.querySelectorAll('tr').forEach(row => {
     const tds = row.querySelectorAll('td');
     if(tds[idx + 1]) tds[idx + 1].classList.add('compare-td-hour-selected');
   });
+  if(targetTh){
+    const wrap = document.querySelector('.compare-table-wrap');
+    if(wrap){
+      const thLeft = targetTh.offsetLeft;
+      const thWidth = targetTh.offsetWidth;
+      const wrapWidth = wrap.clientWidth;
+      const scrollTarget = thLeft - (wrapWidth / 2) + (thWidth / 2);
+      wrap.scrollTo({ left: Math.max(0, scrollTarget), behavior: 'smooth' });
+    }
+  }
 }
 
 function renderComparisonCards(){
@@ -4891,13 +4979,46 @@ function renderComparisonChartLegend(entries){
   });
 }
 
+function compareChartHours(){
+  return comparisonChartWindowHours || comparisonDisplayHours();
+}
+
+function syncChartToTableScroll(){
+  if(!getComparePeriodPreset().allHours) return;
+  const wrap = document.querySelector('.compare-table-wrap');
+  if(!wrap) return;
+  const MODEL_COL_W = 130;
+  const HOUR_COL_W = 62;
+  const scrollLeft = wrap.scrollLeft;
+  const clientWidth = wrap.clientWidth;
+  const allHours = comparisonDisplayHours();
+  if(!allHours.length) return;
+  const startIdx = Math.max(0, Math.floor((scrollLeft) / HOUR_COL_W) - 1);
+  const visibleCount = Math.ceil((clientWidth - MODEL_COL_W) / HOUR_COL_W);
+  const endIdx = Math.min(allHours.length, startIdx + visibleCount + 3);
+  const windowHours = allHours.slice(startIdx, endIdx);
+  if(!windowHours.length) return;
+  comparisonChartWindowHours = windowHours;
+  updateComparisonMainChart();
+}
+
+function attachCompareTableScrollListener(){
+  const wrap = document.querySelector('.compare-table-wrap');
+  if(!wrap || wrap._scrollListenerAttached) return;
+  wrap._scrollListenerAttached = true;
+  wrap.addEventListener('scroll', () => {
+    if(compareScrollDebounce) clearTimeout(compareScrollDebounce);
+    compareScrollDebounce = setTimeout(syncChartToTableScroll, 80);
+  });
+}
+
 function renderComparisonMainChart(){
   destroyComparisonMainChart();
   const canvas = document.getElementById('compareMainChart');
   const title = document.getElementById('compareChartTitle');
   if(!canvas || typeof Chart === 'undefined') return;
   const entries = comparisonLoadedEntries();
-  const hours = comparisonDisplayHours();
+  const hours = compareChartHours();
   const key = compareChartMetricKey();
   const meta = compareTableMetricMeta(comparisonTableMetric);
   if(title) title.textContent = `${meta.label} — all models (${meta.unit})`;
@@ -4989,7 +5110,7 @@ function renderComparisonMainChart(){
 function updateComparisonMainChart(){
   if(!comparisonMainChart) return;
   const entries = comparisonLoadedEntries();
-  const hours = comparisonDisplayHours();
+  const hours = compareChartHours();
   const key = compareChartMetricKey();
   if(entries.length < 1 || hours.length < 2){
     destroyComparisonMainChart();
@@ -5057,8 +5178,13 @@ function renderComparison(){
   highlightComparisonTableHour(comparisonSelectedHour);
   renderSkippedGribs();
   renderComparisonAgreement();
+  if(getComparePeriodPreset().allHours && !comparisonChartWindowHours){
+    const allH = comparisonDisplayHours();
+    comparisonChartWindowHours = allH.slice(0, Math.min(24, allH.length));
+  }
   renderComparisonCharts();
   setupComparisonChartResize();
+  attachCompareTableScrollListener();
   updateComparisonStatusLine();
   updateExportCompareOption();
 }
