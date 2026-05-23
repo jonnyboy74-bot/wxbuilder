@@ -312,7 +312,7 @@ def build_crew_form_stubs(form: dict) -> str:
   <input id="raceDay" type="hidden" value="{_attr_value(form.get('raceDay', ''))}">
   <input id="fNote" type="hidden" value="{_attr_value(form.get('fNote', ''))}">
   <input id="fFooter" type="hidden" value="{_attr_value(form.get('fFooter', ''))}">
-  <select id="comparePeriod"><option value="race" selected>Race day</option><option value="fullday">Full day</option><option value="h12">12 hours</option><option value="h24">24 hours</option></select>
+  <select id="comparePeriod"><option value="race" selected>Race day</option><option value="fullday">Full day</option><option value="h12">12 hours</option><option value="h24">24 hours</option><option value="allhours">Full range (all hours)</option></select>
   <select id="briefingModel"><option value="grib" selected>grib</option></select>
   <select id="forecastSource"><option value="grib" selected>grib</option></select>
   <div id="periodList"></div>
