@@ -4012,6 +4012,10 @@ function comparisonDisplayHours(){
   if(preset.allHours){
     return comparisonHours();
   }
+  const hours = comparisonHours();
+  if(hours.length > 0 && typeof hours[0] === 'string'){
+    return hours;
+  }
   const DISPLAY_MIN = 6;
   const DISPLAY_MAX = 18;
   let from = DISPLAY_MIN;
@@ -4020,7 +4024,7 @@ function comparisonDisplayHours(){
     from = Math.max(DISPLAY_MIN, preset.from);
     to = Math.min(DISPLAY_MAX, preset.to);
   }
-  return comparisonHours()
+  return hours
     .map(h => Number(h))
     .filter(h => !isNaN(h) && h >= from && h <= to)
     .sort((a, b) => a - b);
