@@ -4021,7 +4021,9 @@ function _pubCutHours(hours){
 function comparisonDisplayHours(){
   const preset = getComparePeriodPreset();
   if(preset.allHours){
-    return _pubCutHours(comparisonHours());
+    const date = getComparisonDate();
+    const fromDate = comparisonHours().filter(h => typeof h !== 'string' || !h.includes('T') || h.slice(0,10) >= date);
+    return _pubCutHours(fromDate);
   }
   const hours = comparisonHours();
   if(hours.length > 0 && typeof hours[0] === 'string'){
