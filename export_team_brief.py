@@ -160,10 +160,10 @@ function initCrewBriefPage(){
   if(compareDate && raceDate) compareDate.value = raceDate;
   if(fDate && raceDate) fDate.value = raceDate;
   const periodSel = document.getElementById('comparePeriod');
-  if(periodSel && snap.periodId) periodSel.value = snap.periodId;
-  applyComparisonPeriodFilter();
   const defaultTab = meta.briefingAvailable ? 'compare' : 'compare';
   switchMainTab(defaultTab);
+  if(periodSel && snap.periodId) periodSel.value = snap.periodId;
+  applyComparisonPeriodFilter();
   const briefDoc = document.getElementById('forecastDoc');
   if(briefDoc && typeof TEAM_BRIEFING_HTML === 'string') briefDoc.innerHTML = TEAM_BRIEFING_HTML;
   requestAnimationFrame(() => {
