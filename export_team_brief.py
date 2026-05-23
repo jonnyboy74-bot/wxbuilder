@@ -191,6 +191,7 @@ function updateSidebarForMainTab(tab){
 }
 
 function switchMainTab(tab){
+  document.querySelector('.preview-area')?.scrollTo({ top: 0 });
   const isCompare = tab === 'compare';
   const isExpedition = tab === 'expedition';
   const forecastDoc = document.getElementById('forecastDoc');
